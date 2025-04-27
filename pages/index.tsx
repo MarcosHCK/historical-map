@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import type { NextConfig } from 'next'
+import { Group, Text } from '@mantine/core'
 
-const nextConfig: NextConfig =
+export const Index = () =>
 {
-  reactStrictMode: true,
-};
+  return <Group mt={50} justify="center">
+      <Text>Just testing</Text>
+    </Group>
+}
 
-export default nextConfig
+export default Index

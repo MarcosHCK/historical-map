@@ -14,11 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import type { NextConfig } from 'next'
+import { Html, Head, Main, NextScript } from 'next/document'
+import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core'
 
-const nextConfig: NextConfig =
+export const Document = () =>
 {
-  reactStrictMode: true,
-};
+  return <Html lang='en' {...mantineHtmlProps}>
+    
+    <Head>
+      <ColorSchemeScript />
+    </Head>
 
-export default nextConfig
+    <body>
+      <Main />
+      <NextScript />
+    </body>
+  </Html>
+}
+
+export default Document

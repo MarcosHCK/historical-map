@@ -14,11 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import type { NextConfig } from 'next'
+import '@mantine/core/styles.css'
+import { MantineProvider } from '@mantine/core'
+import { theme } from '../theme'
+import Head from 'next/head'
 
-const nextConfig: NextConfig =
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const App = ({ Component, pageProps }: any) =>
 {
-  reactStrictMode: true,
-};
+  return <MantineProvider theme={theme}>
 
-export default nextConfig
+    <Head>
+      
+      <title>Mantine Template</title>
+      
+      <meta content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no' name='viewport' />
+      <link rel="shortcut icon" href="/favicon.ico" />
+    </Head>
+
+    <Component {...pageProps} />
+  </MantineProvider>
+}
+
+export default App

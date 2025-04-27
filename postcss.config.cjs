@@ -14,11 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import type { NextConfig } from 'next'
 
-const nextConfig: NextConfig =
+module.exports =
 {
-  reactStrictMode: true,
-};
-
-export default nextConfig
+  plugins:
+    {
+      'postcss-preset-mantine':
+        { },
+      'postcss-simple-vars':
+        {
+          variables:
+            {
+              'mantine-breakpoint-xs': '36em',
+              'mantine-breakpoint-sm': '48em',
+              'mantine-breakpoint-md': '62em',
+              'mantine-breakpoint-lg': '75em',
+              'mantine-breakpoint-xl': '88em',
+            },
+        },
+    },
+}
