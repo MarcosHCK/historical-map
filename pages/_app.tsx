@@ -15,13 +15,27 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import '@mantine/core/styles.css'
-import { MantineProvider } from '@mantine/core'
+import '@mantine/notifications/styles.css'
+import { AppShell, Burger, Group, MantineProvider, rem } from '@mantine/core'
+import { MapsIndex } from '../components/MapsIndex'
+import { Notifications } from '@mantine/notifications'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { theme } from '../theme'
+import { useDisclosure } from '@mantine/hooks'
+import css from './_app.module.css'
 import Head from 'next/head'
+
+const headerHeightPx = 70
+const breakpointWidthPx = 200
+
+const queryClient = new QueryClient ()
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const App = ({ Component, pageProps }: any) =>
 {
+
+  const [ opened, { toggle } ] = useDisclosure (false)
+
   return <MantineProvider theme={theme}>
 
     <Head>
@@ -32,7 +46,34 @@ export const App = ({ Component, pageProps }: any) =>
       <link rel="shortcut icon" href="/favicon.ico" />
     </Head>
 
-    <Component {...pageProps} />
+    <Notifications position='top-right' zIndex={1002} />
+    <QueryClientProvider client={queryClient}>
+
+      <AppShell header={{ height: headerHeightPx }}
+                navbar={{ breakpoint: breakpointWidthPx,
+                          collapsed: { desktop: !opened, mobile: !opened },
+                              width: { base: '90vw', xs: rem (400) } }}
+                padding='md'>
+
+        <AppShell.Header>
+
+          <Group className={css.appShellHeaderGroup}>
+
+            <Burger opened={opened} onClick={toggle} />
+          </Group>
+        </AppShell.Header>
+
+        <AppShell.Main className={css.appShellMain}>
+
+          <Component {...pageProps} />
+        </AppShell.Main>
+
+        <AppShell.Navbar>
+
+          <MapsIndex />
+        </AppShell.Navbar>
+      </AppShell>
+    </QueryClientProvider>
   </MantineProvider>
 }
 

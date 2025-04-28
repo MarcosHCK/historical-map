@@ -1,0 +1,71 @@
+{
+  "$defs":
+    {
+      "MapsIndex":
+        {
+          "additionalProperties": false,
+          "properties":
+            {
+              "entries": { "items":
+                {
+                  "$ref": "#/$defs/MapsIndexEntry" },
+                  "type": "array"
+                },
+              "version": { "type": "string" }
+            },
+          "required": [ "entries", "version" ],
+          "type": "object"
+        },
+      "MapsIndexEntry":
+        {
+          "additionalProperties": false,
+          "properties":
+            {
+              "type": { "enum": [ "group", "map" ], "type": "string" },
+              "value": { }
+            },
+          "required": [ "value", "type" ],
+          "type": "object",
+
+          "allOf":
+            [
+              {
+                "if": { "properties": { "type": { "const": "group" } } },
+                "then": { "properties": { "value": { "$ref": "#/$defs/MapsIndexEntryGroup" } } }
+              },
+              {
+                "if": { "properties": { "type": { "const": "map" } } },
+                "then": { "properties": { "value": { "$ref": "#/$defs/MapsIndexEntryMap" } } }
+              }
+            ]
+        },
+      "MapsIndexEntryGroup":
+        {
+          "additionalProperties": false,
+          "properties":
+            {
+              "entries":
+                {
+                  "items": { "$ref": "#/$defs/MapsIndexEntry" },
+                  "type": "array"
+                },
+              "title": { "type": "string" }
+            },
+          "required": [ "entries", "title" ],
+          "type": "object"
+        },
+      "MapsIndexEntryMap":
+        {
+          "additionalProperties": false,
+          "properties":
+            {
+              "metaFile": { "type": "string" },
+              "title": { "type": "string" }
+            },
+          "required": [ "metaFile", "title" ],
+          "type": "object"
+        }
+    },
+  "$ref": "#/$defs/MapsIndex",
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

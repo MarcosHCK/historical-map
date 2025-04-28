@@ -1,0 +1,17 @@
+{
+  "$defs":
+    {
+      "MapDescription":
+        {
+          "additionalProperties": false,
+          "properties":
+            {
+              "version": { "type": "string" }
+            },
+          "required": [ "version" ],
+          "type": "object"
+        }
+    },
+  "$ref": "#/$defs/MapDescription",
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

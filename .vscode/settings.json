@@ -1,0 +1,13 @@
+{
+  "json.schemas":
+    [
+      {
+        "fileMatch": [ "public/maps/*.json" ],
+        "url": "./lib/MapDescriptionSchema.json"
+      },
+      {
+        "fileMatch": [ "public/index.json" ],
+        "url": "./lib/MapsIndexSchema.json"
+      }
+    ]
+}
