@@ -19,18 +19,18 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
 import { resolve } from 'url'
 import { useNotification } from './useNotification'
-import input, { type MapsIndex } from '../lib/MapsIndex'
+import input, { type MapDescription } from '../lib/MapDescription'
 
-export const useMapsIndex = (baseUrl: string = '/', indexFile: string = 'index.json') =>
+export const useMapDescription = (baseUrl: string = '/', metaFile: string) =>
 {
   const notify = useNotification ()
-  const url = useMemo (() => resolve (baseUrl, indexFile), [baseUrl, indexFile])
+  const url = useMemo (() => resolve (baseUrl, metaFile), [baseUrl, metaFile])
 
   const { data: index, error } = useQuery (
     {
       placeholderData: keepPreviousData,
-      queryFn: async () => input.fetch<MapsIndex> (url),
-      queryKey: [ 'maps', 'index', url ],
+      queryFn: async () => input.fetch<MapDescription> (url),
+      queryKey: [ 'map', 'description', url ],
     })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])

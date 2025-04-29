@@ -14,31 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import schema from './MapsIndexSchema.json'
-import { JsonInput } from './JsonInput'
-export const input = new JsonInput (schema)
-export default input
 
-export interface MapsIndex
+import { useMapDescription } from "../hooks/useMapDescription"
+
+const MapMain = ({ meta }: { meta: string }) =>
 {
-  entries: MapsIndexEntry[]
-  version: string
+  const desc = useMapDescription (undefined, meta)
+  return <>{ `map from ${meta}, texture = ${desc?.textureFile} and walk = ${desc?.walkFile}` }</>
 }
 
-export interface MapsIndexEntry
-{
-  type: 'group' | 'map'
-  value: MapsIndexEntryGroup | MapsIndexEntryMap
-}
-
-export interface MapsIndexEntryGroup
-{
-  entries: MapsIndexEntry[]
-  title: string
-}
-
-export interface MapsIndexEntryMap
-{
-  metaFile: string
-  title: string
-}
+export { MapMain as Map }

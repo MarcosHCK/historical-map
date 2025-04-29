@@ -14,31 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import schema from './MapsIndexSchema.json'
-import { JsonInput } from './JsonInput'
-export const input = new JsonInput (schema)
-export default input
+import { Alert } from "@mantine/core"
+import { Map as MapMain } from '../components/Map'
+import { useRouter } from "next/router"
+import { useMemo } from "react"
 
-export interface MapsIndex
+function Good ({ query }: { query: string })
 {
-  entries: MapsIndexEntry[]
-  version: string
+
+  const meta = useMemo (() => Buffer.from (query, 'base64').toString ('utf8'), [query])
+  return <MapMain meta={meta} />
 }
 
-export interface MapsIndexEntry
+export const MapPage = () =>
 {
-  type: 'group' | 'map'
-  value: MapsIndexEntryGroup | MapsIndexEntryMap
+  const router = useRouter ()
+  const { meta: query } = router.query
+
+  return query && ! Array.isArray (query) ? <Good query={query} /> : <Alert color='red'>Bad use of map route</Alert>
 }
 
-export interface MapsIndexEntryGroup
-{
-  entries: MapsIndexEntry[]
-  title: string
-}
-
-export interface MapsIndexEntryMap
-{
-  metaFile: string
-  title: string
-}
+export default MapPage

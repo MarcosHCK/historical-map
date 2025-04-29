@@ -11,7 +11,7 @@
                   "$ref": "#/$defs/MapsIndexEntry" },
                   "type": "array"
                 },
-              "version": { "type": "string" }
+              "version": { "pattern": "^[0-9]+\\.[0-9]+$", "type": "string" }
             },
           "required": [ "entries", "version" ],
           "type": "object"
@@ -59,7 +59,7 @@
           "additionalProperties": false,
           "properties":
             {
-              "metaFile": { "type": "string" },
+              "metaFile": { "format": "uri-relative", "type": "string" },
               "title": { "type": "string" }
             },
           "required": [ "metaFile", "title" ],

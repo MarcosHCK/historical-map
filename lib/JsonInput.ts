@@ -16,24 +16,62 @@
  */
 import Ajv, { type Schema, type ValidateFunction } from 'ajv'
 
-export class JsonValidator
+const fetchOptions: RequestInit =
+{
+  headers: { 'Accept': 'application/json' },
+  method: 'GET',
+}
+
+export class JsonInput
 {
 
+  private _fromUrl: string | undefined
   private _validator: ValidateFunction<Schema>
+
+  set fromUrl (value: string | undefined)
+    {
+      this._fromUrl = value
+    }
 
   constructor (schema: Schema)
     {
-      this._validator = (new Ajv ()).compile (schema)
+      const ajv = new Ajv ()
+
+      ajv.addFormat ('uri-relative',
+        {
+          type: 'string',
+          validate: s => this.validateUri (s)
+        })
+
+      this._fromUrl = undefined
+      this._validator = ajv.compile (schema)
     }
 
-  static inline (schema: Schema)
+  async fetch<T = object> (url: string)
     {
-      const ins = new JsonValidator (schema)
-      return (obj: object) => ins.validate (obj)
+
+      const response = await fetch (url, fetchOptions)
+
+      if (response.status !== 200)
+
+        throw Error (await response.text (), { cause: 'fetch' })
+      else
+        {
+          let data: object
+          const origin = response.url
+
+          if (this.validate ((data = await response.json ()), origin))
+
+            return data as T
+          else
+            throw Error ('invalid response from server', { cause: 'validation' })
+        }
     }
 
-  validate (obj: object)
+  validate (obj: object, fromUrl?: string)
     {
+
+      this.fromUrl = fromUrl
 
       if (! this._validator (obj))
         {
@@ -46,5 +84,15 @@ export class JsonValidator
           throw new AggregateError (errors, 'invalid JSON value', { cause: 'json validator' })
         }
     return true
+    }
+
+  validateUri (uri: string)
+    {
+
+      try { return !! new URL (uri) } catch
+        {
+          try { return !! new URL (uri, this._fromUrl) } catch
+            { return false }
+        }
     }
 }

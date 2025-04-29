@@ -6,9 +6,11 @@
           "additionalProperties": false,
           "properties":
             {
-              "version": { "type": "string" }
+              "textureFile": { "format": "uri-relative", "type": "string" },
+              "version": { "pattern": "^[0-9]+\\.[0-9]+$", "type": "string" },
+              "walkFile": { "format": "uri-relative", "type": "string" }
             },
-          "required": [ "version" ],
+          "required": [ "textureFile", "version", "walkFile" ],
           "type": "object"
         }
     },

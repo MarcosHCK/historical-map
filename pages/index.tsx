@@ -16,11 +16,11 @@
  */
 import { Group, Text } from '@mantine/core'
 
-export const Index = () =>
+export const IndexPage = () =>
 {
   return <Group mt={50} justify="center">
       <Text>Just testing</Text>
     </Group>
 }
 
-export default Index
+export default IndexPage
