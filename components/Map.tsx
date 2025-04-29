@@ -28,14 +28,22 @@ import css from './Map.module.css'
 const controlTimeout = 170
 const transitionTime = 70
 
-const MapCanvas = ({ texture, path, scale }: { texture: string, path: SVGPathProperties, scale: number }) =>
+interface MapCanvasProps
+{
+  cursor?: string,
+  texture: string,
+  path: SVGPathProperties,
+  scale: number,
+}
+
+const MapCanvas = ({ cursor = '/cursor.svg', texture, path, scale }: MapCanvasProps) =>
 {
   const [ firstFire, setFirstFire ] = useState (true)
   const [ playing, { close, toggle } ] = useDisclosure (false)
   const [ debouncedPlaying ] = useDebouncedValue (playing, controlTimeout)
   const [ showControl, fireShowControl ] = useTrigger (false, true, controlTimeout)
   const [ velocity, setVelocity ] = useState (100)
-  const [ ref, { pause, play, reset } ] = useAnimator (path, texture, scale * velocity / 100)
+  const [ ref, { pause, play, reset } ] = useAnimator (cursor, path, texture, scale * velocity / 100)
 
   useEffect (() => { switch (playing)
     {
@@ -111,7 +119,7 @@ const MapMain = ({ meta }: { meta: string }) =>
   return <Stack>
 
     <LoadingOverlay visible={loading} />
-    { desc?.textureFile && path && <MapCanvas texture={desc?.textureFile} path={path} scale={desc.scale ?? 1} /> }
+    { desc && path && <MapCanvas cursor={desc.cursor} texture={desc.textureFile} path={path} scale={desc.scale ?? 1} /> }
   </Stack>
 }
 

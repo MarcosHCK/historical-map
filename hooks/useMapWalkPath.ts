@@ -62,7 +62,6 @@ export const useMapWalkPath = (baseUrl: string = '/', walkFile?: string) =>
             }
         },
       queryKey: [ 'maps', 'index', url ],
-      throwOnError: true,
     })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])

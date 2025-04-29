@@ -31,7 +31,7 @@ export interface WalkAnimatorControls
   reset: () => void,
 }
 
-export function useAnimator (path: SVGPathProperties, texture: string, pace: number = 1): UseWalkAnimatorResult
+export function useAnimator (cursor: string, path: SVGPathProperties, texture: string, pace: number = 1): UseWalkAnimatorResult
 {
   const animatorRef = useRef<Animator> (null)
   const canvasRef = useRef<HTMLCanvasElement> (null)
@@ -53,6 +53,7 @@ export function useAnimator (path: SVGPathProperties, texture: string, pace: num
       case 'play': animatorRef.current?.play (); break;
     }}, [state])
 
+  useEffect (() => animatorRef.current?.setCursor (cursor), [cursor])
   useEffect (() => animatorRef.current?.setBackground (texture), [texture])
   useEffect (() => { animatorRef.current!.path = path }, [path])
   useEffect (() => { animatorRef.current!.step = pace }, [pace])

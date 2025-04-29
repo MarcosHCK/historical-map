@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Circle } from 'two.js/src/shapes/circle'
 import { type Rectangle } from 'two.js/src/shapes/rectangle'
 import { type Shape } from 'two.js/src/shape'
 import { type SVGPathProperties } from '../hooks/useMapWalkPath'
@@ -39,10 +38,8 @@ export class Animator
 
   public set path (path: SVGPathProperties)
     {
-      const start = path.getPropertiesAtLength (0)
-
-      this._cursor.position.set (start.x, start.y)
       this._path = path
+      this._renderAt (0)
     }
 
   public set step (step: number)
@@ -50,18 +47,27 @@ export class Animator
       this._step = step
     }
 
+  public get _cursorSize ()
+    {
+      const two = this._two
+      const max = Math.max (two.height, two.width)
+      return Math.max (27, max / 60)
+    }
+
   constructor (canvas: HTMLCanvasElement)
     {
       let two: Two
-      let cursor: Circle
+      let cursor: Rectangle
       this._two = (two = new Two ({ autostart: false, domElement: canvas, type: Two.Types.canvas }))
-      this._background = two.makeRectangle (two.width / 2, two.height / 2, two.width, two.height)
+      this._background = two.makeRectangle (0, 0, two.width, two.height)
       this._canvas = canvas
-      this._cursor = (cursor = two.makeCircle (0, 0, 10))
+
+      const size = this._cursorSize
+      this._cursor = (cursor = two.makeRectangle (0, 0, size, size))
 
       cursor.fill = '#ff8000'
 
-      two.bind ('update', () => this.render ())
+      two.bind ('update', () => this._render ())
     }
 
   cleanup ()
@@ -73,17 +79,25 @@ export class Animator
   pause () { this._two.pause () }
   play () { this._two.play () }
 
-  private render ()
+  private _render ()
     {
       let length: number
+      if (! this._path) return
 
       const at = this._walked
-      const nextX = this._path?.getPointAtLength (at)?.x ?? 0
-      const nextY = this._path?.getPointAtLength (at)?.y ?? 0
-      const nextAt = at + this._step * (length = this._totalLength)
+      const next = at + this._step * (length = this._totalLength)
 
-      this._cursor.translation.set (nextX, nextY)
-      this._walked = nextAt > length ? 0 : nextAt
+      this._renderAt (at)
+      this._walked = next > length ? 0 : next
+    }
+
+  private _renderAt (at: number)
+    {
+
+      const next = this._path!.getPropertiesAtLength (at)
+
+      this._cursor.rotation = Math.atan2 (next.tangentY, next.tangentX)
+      this._cursor.translation.set (next.x, next.y)
     }
 
   reset ()
@@ -110,7 +124,32 @@ export class Animator
           this._background.height = img.height
           this._background.width = img.width
           this._background.scale = 1
-          this._background.opacity = 1
+          this._background.opacity = 1;
+          (this._cursor as Rectangle).height = this._cursorSize;
+          (this._cursor as Rectangle).width = this._cursorSize
+        }
+
+      img.src = url
+    }
+
+  setCursor (url: string)
+    {
+      const two = this._two
+      const img = new Image ()
+
+      img.onload = () =>
+        {
+
+          let rect: Rectangle
+          const size = this._cursorSize
+          const texture = two.makeTexture (img)
+
+          this._cursor.remove ()
+          this._cursor = (rect = this._two.makeSprite (texture, 0, 0))
+
+          rect.noStroke ()
+          rect.opacity = 1
+          rect.scale = new Two.Vector (size / img.width, size / img.height)
         }
 
       img.src = url
