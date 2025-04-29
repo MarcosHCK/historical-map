@@ -21,6 +21,7 @@ export default input
 
 export interface MapDescription
 {
+  scale?: number,
   textureFile: string,
   version: string,
   walkFile: string,

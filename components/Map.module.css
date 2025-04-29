@@ -25,6 +25,13 @@
   z-index: 2;
 }
 
+.canvasContainer
+{
+  height: fit-content;
+  position: relative;
+  width: fit-content;
+}
+
 .canvasGroup
 {
   left: 0;
