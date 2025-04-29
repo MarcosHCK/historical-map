@@ -16,7 +16,7 @@
  */
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
-import { AppShell, Burger, Group, MantineProvider, rem } from '@mantine/core'
+import { AppShell, Burger, Grid, Group, MantineProvider, rem } from '@mantine/core'
 import { MapsIndex } from '../components/MapsIndex'
 import { Notifications } from '@mantine/notifications'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -27,6 +27,11 @@ import Head from 'next/head'
 
 const headerHeightPx = 70
 const breakpointWidthPx = 200
+
+const columns = 32 as const
+const spaceSizes = { base: 0, sm: 1 } as const
+const centerSizeTuples = Object.entries (spaceSizes).map (([b, s]) => [ b, columns - s * 2 ]) as readonly [string,number][]
+const centerSizes = Object.fromEntries (centerSizeTuples)
 
 const queryClient = new QueryClient ()
 
@@ -65,7 +70,10 @@ export const App = ({ Component, pageProps }: any) =>
 
         <AppShell.Main className={css.appShellMain}>
 
-          <Component {...pageProps} />
+          <Grid columns={columns} gutter={0}>
+
+            <Grid.Col offset={spaceSizes} span={centerSizes}> <Component {...pageProps} /> </Grid.Col>
+          </Grid>
         </AppShell.Main>
 
         <AppShell.Navbar>

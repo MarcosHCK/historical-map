@@ -1,5 +1,5 @@
 {
-  "textureFile": "/marti1895/map.png",
+  "textureFile": "/maps/marti1895/map.png",
   "version": "1.0",
-  "walkFile": "/marti1895/map.svg"
+  "walkFile": "/maps/marti1895/map.svg"
 }

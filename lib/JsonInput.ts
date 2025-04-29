@@ -50,11 +50,12 @@ export class JsonInput
   async fetch<T = object> (url: string)
     {
 
+      let code: number
       const response = await fetch (url, fetchOptions)
 
-      if (response.status !== 200)
+      if ((code = response.status) !== 200)
 
-        throw Error (await response.text (), { cause: 'fetch' })
+        throw Error (`'${url}' fetch error: ${code}`, { cause: 'fetch' })
       else
         {
           let data: object
