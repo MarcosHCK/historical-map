@@ -15,5 +15,6 @@
 # along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
 #
 
+/cursor.svg
 /index.json
 /maps/**/*
