@@ -14,46 +14,31 @@
 # You should have received a copy of the GNU General Public License
 # along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
 #
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+name: Build and Deploy in GitHub Pages
 
-/keys
+on:
+ push:
+   branches:
+     - master
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+jobs:
+ deploy:
+   concurrency: ci-${{ github.ref }}
+   runs-on: ubuntu-latest
+   steps:
 
-# testing
-/coverage
+     - name: Checkout 🛎️
+       uses: actions/checkout@v3
 
-# next.js
-/.next/
-/out/
+     - name: Install and Build 🔧
+       run: |
+         npm ci
+         npm run build
 
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+     - name: Deploy 🚀
+       uses: JamesIves/github-pages-deploy-action@v4
+       with:
+         folder: out/
+         clean: true
+         clean-exclude: article.json
+         ssh-key: ${{ secrets.DEPLOY_KEY }}
