@@ -23,35 +23,40 @@ on:
 
 jobs:
  deploy:
-   concurrency: ci-${{ github.ref }}
-   runs-on: ubuntu-latest
-   steps:
+  concurrency: ci-${{ github.ref }}
+  runs-on: ubuntu-latest
+  steps:
 
-     - name: Checkout 🛎️
-       uses: actions/checkout@v3
+   - name: Checkout 🛎️
+     uses: actions/checkout@v3
 
-     - name: Install Node.js 🔧
-       uses: actions/setup-node@v3
-       with:
-         node-version: 20
+   - name: Install Node.js 🔧
+     uses: actions/setup-node@v3
+     with:
+      node-version: 20
 
-     - name: Install dependencies 🔧
-       run: |
-         npm install
+   - name: Install dependencies 🔧
+     run: |
+      npm install
 
-     - name: Configuring base path 🔧
-       run: |
-         echo "BASE_PATH=/${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+   - name: Configuring base path 🔧
+     run: |
+      echo "BASE_PATH=/${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
-     - name: Build 🔧
-       run: |
-         echo "Deploying with base path: $BASE_PATH"
-         NEXT_PUBLIC_BASE_PATH=$BASE_PATH npm run build
+   - name: Build 🔧
+     run: |
+      echo "Deploying with base path: $BASE_PATH"
+      NEXT_PUBLIC_BASE_PATH=$BASE_PATH npm run build
 
-     - name: Deploy 🚀
-       uses: JamesIves/github-pages-deploy-action@v4
-       with:
-         folder: out/
-         clean: true
-         clean-exclude: article.json
-         ssh-key: ${{ secrets.DEPLOY_KEY }}
+   - name: Deploy 🚀
+     uses: JamesIves/github-pages-deploy-action@v4
+     with:
+       folder: out/
+       clean: true
+       clean-exclude: |
+        .nojekyll
+        cursor.svg
+        index.json
+        maps/*
+
+       ssh-key: ${{ secrets.DEPLOY_KEY }}

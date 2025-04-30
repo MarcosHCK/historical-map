@@ -24,6 +24,8 @@ import { theme } from '../theme'
 import { useDisclosure } from '@mantine/hooks'
 import css from './_app.module.css'
 import Head from 'next/head'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 const headerHeightPx = 70
 const breakpointWidthPx = 200
@@ -38,8 +40,15 @@ const queryClient = new QueryClient ()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const App = ({ Component, pageProps }: any) =>
 {
+  const [ opened, { close, toggle } ] = useDisclosure (false)
+  const router = useRouter () 
 
-  const [ opened, { toggle } ] = useDisclosure (false)
+  useEffect (() =>
+    {
+      const handleRouting = () => close ()
+                     router.events.on ('routeChangeStart', handleRouting)
+      return () => { router.events.off ('routeChangeStart', handleRouting) }
+    }, [close, router])
 
   return <MantineProvider defaultColorScheme='auto' theme={theme}>
 

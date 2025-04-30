@@ -16,15 +16,17 @@
  */
 'use client';
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo } from 'react'
 import { resolve } from 'url'
+import { useEffect, useMemo } from 'react'
 import { useNotification } from './useNotification'
+import { useRouter } from 'next/router'
 import input, { type MapDescription } from '../lib/MapDescription'
 
-export const useMapDescription = (baseUrl: string = '/', metaFile: string) =>
+export const useMapDescription = (baseUrl: string | undefined = undefined, metaFile: string) =>
 {
   const notify = useNotification ()
-  const url = useMemo (() => resolve (baseUrl, metaFile), [baseUrl, metaFile])
+  const router = useRouter ()
+  const url = useMemo (() => resolve (baseUrl ?? router.basePath, metaFile), [baseUrl, metaFile, router])
 
   const { data: index, error } = useQuery (
     {
