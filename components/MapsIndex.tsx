@@ -15,14 +15,15 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { getTreeExpandedState, Group, Stack, Text, Tree, useTree } from '@mantine/core'
+import { PiFolder, PiFolderOpen, PiMapTrifold } from 'react-icons/pi'
 import { type MapsIndex } from '../lib/MapsIndex'
 import { type MapsIndexEntry } from '../lib/MapsIndex'
 import { type MapsIndexEntryGroup } from '../lib/MapsIndex'
 import { type MapsIndexEntryMap } from '../lib/MapsIndex'
 import { type RenderTreeNodePayload, type TreeNodeData } from '@mantine/core'
+import { useHRef } from '../hooks/useHRef'
 import { useMapsIndex } from '../hooks/useMapsIndex'
 import { useMemo } from 'react'
-import { PiFolder, PiFolderOpen, PiMapTrifold } from 'react-icons/pi'
 import Link from 'next/link'
 
 function parseGroup (group: MapsIndexEntryGroup): TreeNodeData
@@ -76,7 +77,8 @@ function Leaf ({ node, expanded, hasChildren, elementProps }: RenderTreeNodePayl
 
 export function MapsIndex ()
 {
-  const index = useMapsIndex ()
+  const indexUrl = useHRef ('index.json')
+  const index = useMapsIndex (indexUrl!)
 
   const tree = useMemo (() => ! index ? [] : parseIndex (index), [index])
   const store = useTree ({ initialExpandedState: getTreeExpandedState (tree, '*') })

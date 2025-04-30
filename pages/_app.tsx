@@ -22,10 +22,11 @@ import { Notifications } from '@mantine/notifications'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { theme } from '../theme'
 import { useDisclosure } from '@mantine/hooks'
+import { useEffect } from 'react'
+import { useHRef } from '../hooks/useHRef'
+import { useRouter } from 'next/router'
 import css from './_app.module.css'
 import Head from 'next/head'
-import { useEffect } from 'react'
-import { useRouter } from 'next/router'
 
 const headerHeightPx = 70
 const breakpointWidthPx = 200
@@ -57,7 +58,7 @@ export const App = ({ Component, pageProps }: any) =>
       <title>Historical maps</title>
       
       <meta content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no' name='viewport' />
-      <link rel="shortcut icon" href="/favicon.ico" />
+      <link rel='shortcut icon' href={useHRef ('/favicon.ico')} />
     </Head>
 
     <Notifications position='top-right' zIndex={1002} />

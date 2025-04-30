@@ -16,10 +16,9 @@
  */
 'use client';
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { resolve } from 'url'
-import { useEffect, useMemo } from 'react'
-import { useNotification } from './useNotification'
 import { svgPathProperties } from 'svg-path-properties'
+import { useEffect } from 'react'
+import { useNotification } from './useNotification'
 
 const fetchOptions: RequestInit =
 {
@@ -29,10 +28,9 @@ const fetchOptions: RequestInit =
 
 export type SVGPathProperties = ReturnType<typeof svgPathProperties>
 
-export const useMapWalkPath = (baseUrl: string = '/', walkFile?: string) =>
+export const useMapWalkPath = (url?: string) =>
 {
   const notify = useNotification ()
-  const url = useMemo (() => walkFile && resolve (baseUrl, walkFile), [baseUrl, walkFile])
 
   const { data: index, error } = useQuery (
     {

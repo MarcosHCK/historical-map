@@ -20,6 +20,7 @@ import { type SVGPathProperties, useMapWalkPath } from '../hooks/useMapWalkPath'
 import { useAnimator } from '../hooks/useAnimator'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDebouncedValue, useDisclosure, useHover } from '@mantine/hooks'
+import { useHRef } from '../hooks/useHRef'
 import { useMapDescription } from '../hooks/useMapDescription'
 import { useTrigger } from '../hooks/useTrigger'
 import css from './Map.module.css'
@@ -35,7 +36,7 @@ interface MapCanvasProps
   scale: number,
 }
 
-const MapCanvas = ({ cursor = '/cursor.svg', texture, path, scale }: MapCanvasProps) =>
+const MapCanvas = ({ cursor, texture, path, scale }: MapCanvasProps) =>
 {
   const [ playing, { close, toggle } ] = useDisclosure (false)
   const [ debouncedPlaying ] = useDebouncedValue (playing, controlTimeout)
@@ -98,7 +99,7 @@ const MapCanvas = ({ cursor = '/cursor.svg', texture, path, scale }: MapCanvasPr
 
     <Overlay backgroundOpacity={0} ref={overlayRef} zIndex={2}>
 
-      <Transition mounted={hoverBar}>
+      <Transition mounted={hoverBar && ready}>
 
         { style => 
         <Group className={css.canvasGroup} gap={7} justify='start' style={style}>
@@ -142,11 +143,11 @@ const MapCanvas = ({ cursor = '/cursor.svg', texture, path, scale }: MapCanvasPr
 
 const MapMain = ({ meta }: { meta: string }) =>
 {
-  const desc = useMapDescription (undefined, meta)
-  const path = useMapWalkPath (undefined, desc?.walkFile)
+  const desc = useMapDescription (useHRef (meta)!)
+  const path = useMapWalkPath (useHRef (desc?.walkFile))
   const cursor = useMemo (() => desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg'), [desc])
 
-  return <MapCanvas cursor={cursor} texture={desc?.textureFile} path={path} scale={desc?.scale ?? 1} />
+  return <MapCanvas cursor={useHRef (cursor)} texture={useHRef (desc?.textureFile)} path={path} scale={desc?.scale ?? 1} />
 }
 
 export { MapMain as Map }

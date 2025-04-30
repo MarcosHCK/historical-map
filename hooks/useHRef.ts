@@ -15,22 +15,27 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 'use client';
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
-import { useNotification } from './useNotification'
-import input, { type MapsIndex } from '../lib/MapsIndex'
+import { resolve } from 'url'
+import { useRouter } from 'next/router'
+import { useMemo } from 'react';
 
-export const useMapsIndex = (url: string) =>
+function abs (url: string, baseUrl: string)
 {
-  const notify = useNotification ()
+  if (! url.startsWith ('/'))
 
-  const { data: index, error } = useQuery (
-    {
-      placeholderData: keepPreviousData,
-      queryFn: async () => input.fetch<MapsIndex> (url),
-      queryKey: [ 'maps', 'index', url ],
-    })
+    return url
+  else
+    return resolve (baseUrl, url.substring (1))
+}
 
-  useEffect (() => { if (error) notify.push (error) }, [error, notify])
-return index
+function norm (url: string)
+{
+  return url.endsWith ('/') ? url : `${url}/`
+}
+
+export function useHRef (url?: string, altBasePath: string | undefined = undefined)
+{
+  const router = useRouter ()
+  const basePath = useMemo (() => norm (router.basePath), [router])
+return useMemo (() => url === undefined ? undefined : abs (url, altBasePath ?? basePath), [altBasePath, basePath, url])
 }
