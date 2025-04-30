@@ -28,13 +28,16 @@ export interface WalkAnimatorControls
 {
   pause: () => void,
   play: () => void,
+  present: () => void,
+  ready: boolean,
   reset: () => void,
 }
 
-export function useAnimator (cursor: string, path: SVGPathProperties, texture: string, pace: number = 1): UseWalkAnimatorResult
+export function useAnimator (cursor?: string, path?: SVGPathProperties, texture?: string, pace: number = 1): UseWalkAnimatorResult
 {
   const animatorRef = useRef<Animator> (null)
   const canvasRef = useRef<HTMLCanvasElement> (null)
+  const [ ready, setReady ] = useState<boolean> (true)
   const [ state, setState ] = useState<AnimationState> ('pause')
 
   useEffect (() =>
@@ -53,12 +56,19 @@ export function useAnimator (cursor: string, path: SVGPathProperties, texture: s
       case 'play': animatorRef.current?.play (); break;
     }}, [state])
 
-  useEffect (() => animatorRef.current?.setCursor (cursor), [cursor])
-  useEffect (() => animatorRef.current?.setBackground (texture), [texture])
-  useEffect (() => { animatorRef.current!.path = path }, [path])
+  useEffect (() =>
+    {
+      setReady (animatorRef.current?.backgroundReady === true &&
+                animatorRef.current?.cursorReady === true )
+    }, [animatorRef.current?.backgroundReady, animatorRef.current?.cursorReady])
+
+  useEffect (() => { if (cursor) animatorRef.current?.setCursor (cursor) }, [cursor])
+  useEffect (() => { if (texture) animatorRef.current?.setBackground (texture) }, [texture])
+  useEffect (() => { if (path) animatorRef.current!.path = path }, [path])
   useEffect (() => { animatorRef.current!.step = pace }, [pace])
 
+  const present = useCallback (() => { animatorRef.current?.update (); animatorRef.current?.reset () }, [])
   const reset = useCallback (() => { animatorRef.current?.reset () }, [])
 
-return [ canvasRef, { pause: () => setState ('pause'), play: () => setState ('play'), reset } ]
+return [ canvasRef, { pause: () => setState ('pause'), present, play: () => setState ('play'), ready, reset } ]
 }

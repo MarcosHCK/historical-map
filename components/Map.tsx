@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Button, Center, Group, LoadingOverlay, Overlay, Popover, Slider, Stack, Transition } from '@mantine/core'
+import { Button, Center, Group, Overlay, Popover, Slider, Stack, Transition } from '@mantine/core'
 import { PiFastForwardFill, PiPauseFill, PiPlayFill, PiStopFill } from 'react-icons/pi'
 import { type SVGPathProperties, useMapWalkPath } from '../hooks/useMapWalkPath'
 import { useAnimator } from '../hooks/useAnimator'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDebouncedValue, useDisclosure } from '@mantine/hooks'
-import { useLoading } from '../hooks/useLoading'
 import { useMapDescription } from '../hooks/useMapDescription'
 import { useTrigger } from '../hooks/useTrigger'
 import css from './Map.module.css'
@@ -31,8 +30,8 @@ const transitionTime = 70
 interface MapCanvasProps
 {
   cursor?: string,
-  texture: string,
-  path: SVGPathProperties,
+  texture?: string,
+  path?: SVGPathProperties,
   scale: number,
 }
 
@@ -43,7 +42,8 @@ const MapCanvas = ({ cursor = '/cursor.svg', texture, path, scale }: MapCanvasPr
   const [ debouncedPlaying ] = useDebouncedValue (playing, controlTimeout)
   const [ showControl, fireShowControl ] = useTrigger (false, true, controlTimeout)
   const [ velocity, setVelocity ] = useState (100)
-  const [ ref, { pause, play, reset } ] = useAnimator (cursor, path, texture, scale * velocity / 100)
+  const [ ref, { pause, play, present, ready: _ready, reset } ] = useAnimator (cursor, path, texture, scale * velocity / 100)
+  const ready = useMemo (() => !! cursor && !! path && !! texture && _ready, [cursor, path, texture, _ready])
 
   useEffect (() => { switch (playing)
     {
@@ -51,20 +51,24 @@ const MapCanvas = ({ cursor = '/cursor.svg', texture, path, scale }: MapCanvasPr
       case false: pause (); break;
     }}, [pause, play, playing])
 
-  const resetAnimation = useCallback (() =>
+  useEffect (() => { if (!! path && !! texture && ready)
+    { present ()
+    }}, [path, present, ready, texture])
+
+  const resetAnimation = useCallback (() => { if (ready)
     {
       close ()
       setFirstFire (false)
       pause ()
       reset ()
-    }, [close, reset, pause])
+    }}, [close, ready, reset, pause])
 
-  const toggleAnimation = useCallback (() =>
+  const toggleAnimation = useCallback (() => { if (ready)
     {
       toggle ()
       fireShowControl ()
       setFirstFire (false)
-    }, [fireShowControl, toggle])
+    }}, [fireShowControl, ready, toggle])
 
   return <Center> <Stack className={css.canvasContainer}>
 
@@ -75,7 +79,8 @@ const MapCanvas = ({ cursor = '/cursor.svg', texture, path, scale }: MapCanvasPr
       <Center className={css.canvasCenter} onClick={toggleAnimation}>
 
         <Transition duration={transitionTime} mounted={firstFire || showControl} transition='fade'>
-          { style => <Button onClick={toggleAnimation} radius='xl' style={style} variant='filled'>
+          { style => <Button className={css.controlButton} color='white' radius='xl' size='xl' style={style} variant='transparent'
+              loading={! ready} onClick={toggleAnimation}>
             { debouncedPlaying ? <PiPauseFill /> : <PiPlayFill /> }
           </Button> }
         </Transition>
@@ -114,13 +119,9 @@ const MapMain = ({ meta }: { meta: string }) =>
 {
   const desc = useMapDescription (undefined, meta)
   const path = useMapWalkPath (undefined, desc?.walkFile)
-  const loading = useLoading (undefined, desc, path)
+  const cursor = useMemo (() => desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg'), [desc])
 
-  return <Stack>
-
-    <LoadingOverlay visible={loading} />
-    { desc && path && <MapCanvas cursor={desc.cursor} texture={desc.textureFile} path={path} scale={desc.scale ?? 1} /> }
-  </Stack>
+  return <MapCanvas cursor={cursor} texture={desc?.textureFile} path={path} scale={desc?.scale ?? 1} />
 }
 
 export { MapMain as Map }

@@ -24,12 +24,24 @@ export type AnimationState = 'pause' | 'play'
 export class Animator
 {
   private _background: Rectangle
+  private _backgroundReady = true
   private _canvas: HTMLCanvasElement
   private _cursor: Shape
+  private _cursorReady = true
   private _walked: number = 0
   private _path: SVGPathProperties | undefined = undefined
   private _step: number = 0
   private _two: Two
+
+  public get backgroundReady ()
+    {
+      return this._backgroundReady
+    }
+
+  public get cursorReady ()
+    {
+      return this._cursorReady
+    }
 
   private get _totalLength ()
     {
@@ -111,6 +123,8 @@ export class Animator
       const img = new Image ()
       const two = this._two
 
+      this._backgroundReady = false
+
       img.onload = () =>
         {
 
@@ -127,6 +141,7 @@ export class Animator
           this._background.opacity = 1;
           (this._cursor as Rectangle).height = this._cursorSize;
           (this._cursor as Rectangle).width = this._cursorSize
+          this._backgroundReady = true
         }
 
       img.src = url
@@ -136,6 +151,8 @@ export class Animator
     {
       const two = this._two
       const img = new Image ()
+
+      this._cursorReady = false
 
       img.onload = () =>
         {
@@ -150,8 +167,11 @@ export class Animator
           rect.noStroke ()
           rect.opacity = 1
           rect.scale = new Two.Vector (size / img.width, size / img.height)
+          this._cursorReady = true
         }
 
       img.src = url
     }
+
+  update () { this._two.update () }
 }

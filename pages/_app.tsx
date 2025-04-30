@@ -41,7 +41,7 @@ export const App = ({ Component, pageProps }: any) =>
 
   const [ opened, { toggle } ] = useDisclosure (false)
 
-  return <MantineProvider theme={theme}>
+  return <MantineProvider defaultColorScheme='auto' theme={theme}>
 
     <Head>
       

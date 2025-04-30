@@ -40,3 +40,11 @@
   top: 0;
   z-index: 3;
 }
+
+.controlButton
+{
+  &[data-loading]::before
+    {
+      opacity: 0 !important;
+    }
+}
