@@ -77,7 +77,7 @@ function Leaf ({ node, expanded, hasChildren, elementProps }: RenderTreeNodePayl
 
 export function MapsIndex ()
 {
-  const indexUrl = useHRef ('index.json')
+  const indexUrl = useHRef ('/index.json')
   const index = useMapsIndex (indexUrl!)
 
   const tree = useMemo (() => ! index ? [] : parseIndex (index), [index])
