@@ -16,35 +16,37 @@
  */
 import { Button, Center, Group, Overlay, Popover, Skeleton, Slider, Stack, Transition } from '@mantine/core'
 import { PiFastForwardFill, PiPauseFill, PiPlayFill, PiStopFill } from 'react-icons/pi'
-import { type SVGPathProperties, useMapWalkPath } from '../hooks/useMapWalkPath'
+import { type MapDescription } from '../lib/MapDescription'
+import { type Walk } from '../lib/Walk'
 import { useAnimator } from '../hooks/useAnimator'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDebouncedValue, useDisclosure, useHover } from '@mantine/hooks'
 import { useHRef } from '../hooks/useHRef'
 import { useMapDescription } from '../hooks/useMapDescription'
+import { useMapWalkPath } from '../hooks/useMapWalkPath'
 import { useTrigger } from '../hooks/useTrigger'
 import css from './Map.module.css'
 
 const controlTimeout = 170
 const transitionTime = 70
 
-interface MapCanvasProps
+export interface MapCanvasProps extends Omit<MapDescription, 'textureFile' | 'version' | 'walkFile'>
 {
-  cursor?: string,
-  texture?: string,
-  path?: SVGPathProperties,
   scale: number,
+  texture?: string,
+  walk?: Walk,
 }
 
-const MapCanvas = ({ cursor, texture, path, scale }: MapCanvasProps) =>
+export const MapCanvas = ({ cursor, scale, spots, texture, walk }: MapCanvasProps) =>
 {
   const [ playing, { close, toggle } ] = useDisclosure (false)
   const [ debouncedPlaying ] = useDebouncedValue (playing, controlTimeout)
   const [ showControl, fireShowControl ] = useTrigger (false, true, controlTimeout)
   const [ velocity, setVelocity ] = useState (100)
-  const [ ref, { pause, play, present, ready: _ready, reset } ] = useAnimator (cursor, path, texture, scale * velocity / 100)
+  const [ ref, { pause, play, present, ready: _ready, reset } ] = useAnimator (
+    { cursor, pace: scale * velocity / 100, spots, texture, walk })
   const { ref: overlayRef, hovered: hoverBar } = useHover ()
-  const ready = useMemo (() => !! cursor && !! path && !! texture && _ready, [cursor, path, texture, _ready])
+  const ready = useMemo (() => !! cursor && !! texture && !! walk && _ready, [_ready, cursor, texture, walk])
 
   useEffect (() => { switch (playing)
     {
@@ -52,9 +54,9 @@ const MapCanvas = ({ cursor, texture, path, scale }: MapCanvasProps) =>
       case false: pause (); break;
     }}, [pause, play, playing])
 
-  useEffect (() => { if (!! path && !! texture && ready)
+  useEffect (() => { if (!! texture && !! walk && ready)
     { present ()
-    }}, [path, present, ready, texture])
+    }}, [present, ready, texture, walk])
 
   const resetAnimation = useCallback (() => { if (ready)
     {
@@ -144,10 +146,10 @@ const MapCanvas = ({ cursor, texture, path, scale }: MapCanvasProps) =>
 const MapMain = ({ meta }: { meta: string }) =>
 {
   const desc = useMapDescription (useHRef (meta)!)
-  const path = useMapWalkPath (useHRef (desc?.walkFile))
+  const walk = useMapWalkPath (useHRef (desc?.walkFile))
   const cursor = useMemo (() => desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg'), [desc])
 
-  return <MapCanvas cursor={useHRef (cursor)} texture={useHRef (desc?.textureFile)} path={path} scale={desc?.scale ?? 1} />
+  return <MapCanvas cursor={useHRef (cursor)} texture={useHRef (desc?.textureFile)} scale={desc?.scale ?? 1} walk={walk} />
 }
 
 export { MapMain as Map }

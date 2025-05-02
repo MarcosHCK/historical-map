@@ -16,7 +16,7 @@
  */
 'use client';
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { svgPathProperties } from 'svg-path-properties'
+import { type Spot, Walk } from '../lib/Walk'
 import { useEffect } from 'react'
 import { useNotification } from './useNotification'
 
@@ -26,7 +26,47 @@ const fetchOptions: RequestInit =
   method: 'GET',
 }
 
-export type SVGPathProperties = ReturnType<typeof svgPathProperties>
+function collectAttribute (elm: SVGCircleElement, field: string)
+{
+  let code: null | string
+
+  if (!! (code = elm.getAttribute (field)))
+
+    return code
+  else
+    throw Error (`undefined property '${field}' in walk path`,
+      { cause: 'parsing' })
+}
+
+function collectAttributeOrStyle (elm: SVGCircleElement, field: string)
+{
+  let code: null | string
+
+  if (!! (code = elm.getAttribute (field)))
+
+    return code
+  else
+
+    if (!! (code = elm.style.getPropertyValue (field)))
+
+      return code
+    else
+      throw Error (`undefined property '${field}' in walk path`,
+        { cause: 'parsing' })
+}
+
+function collectCircles (nodes: NodeListOf<SVGCircleElement>)
+{
+  const circles: Spot[] = []
+
+  for (let i = 0; i < nodes.length; ++i)
+    { const circle = nodes[i]
+      const cd = collectAttributeOrStyle (circle, 'fill')
+      const cx = Number (collectAttribute (circle, 'cx'))
+      const cy = Number (collectAttribute (circle, 'cy'))
+      circles.push ({ at: [ cx, cy ], code: cd }) }
+return circles
+}
 
 export const useMapWalkPath = (url?: string) =>
 {
@@ -48,18 +88,17 @@ export const useMapWalkPath = (url?: string) =>
             {
               const parser = new DOMParser ()
               const doc = parser.parseFromString (await response.text (), 'image/svg+xml')
-              /* take first path, since a walk svg *should* have only one path */
-              const path = doc.querySelector ('path')
-              const data = path?.getAttribute ('d')
+              const path = doc.querySelector ('path')?.getAttribute ('d')
+              const spots = collectCircles (doc.querySelectorAll ('circle'))
 
-              if (!! data)
-
-                return new svgPathProperties (data)
-              else
-                throw Error ('invalid walk file', { cause: 'parsing' })
+              try
+                { return new Walk (path!, spots) }
+              catch (error)
+                { throw new AggregateError ([ error ], 'invalid walk file', { cause: 'parsing' }) }
             }
         },
       queryKey: [ 'maps', 'index', url ],
+      throwOnError: true,
     })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])

@@ -15,16 +15,11 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { type AnimationState, Animator } from '../lib/Animator'
+import { type MapDescription } from '../lib/MapDescription'
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
-import { type SVGPathProperties } from './useMapWalkPath'
+import { type Walk } from '../lib/Walk'
 
-export type UseWalkAnimatorResult =
-[
-  RefObject<null | HTMLCanvasElement>,
-  WalkAnimatorControls,
-]
-
-export interface WalkAnimatorControls
+export interface AnimatorControls
 {
   pause: () => void,
   play: () => void,
@@ -33,8 +28,22 @@ export interface WalkAnimatorControls
   reset: () => void,
 }
 
-export function useAnimator (cursor?: string, path?: SVGPathProperties, texture?: string, pace: number = 1): UseWalkAnimatorResult
+export type UseAnimatorResult =
+[
+  RefObject<null | HTMLCanvasElement>,
+  AnimatorControls,
+]
+
+export interface UseAnimatorArgs extends Omit<MapDescription, 'textureFile' | 'version' | 'walkFile'>
 {
+  pace?: number,
+  texture?: string,
+  walk?: Walk,
+}
+
+export function useAnimator (desc: UseAnimatorArgs): UseAnimatorResult
+{
+  const { cursor, pace = 1, texture, walk } = desc
   const animatorRef = useRef<Animator> (null)
   const canvasRef = useRef<HTMLCanvasElement> (null)
   const [ ready, setReady ] = useState<boolean> (true)
@@ -64,7 +73,7 @@ export function useAnimator (cursor?: string, path?: SVGPathProperties, texture?
 
   useEffect (() => { if (cursor) animatorRef.current?.setCursor (cursor) }, [cursor])
   useEffect (() => { if (texture) animatorRef.current?.setBackground (texture) }, [texture])
-  useEffect (() => { if (path) animatorRef.current!.path = path }, [path])
+  useEffect (() => { if (walk) animatorRef.current!.walk = walk }, [walk])
   useEffect (() => { animatorRef.current!.step = pace }, [pace])
 
   const present = useCallback (() => { animatorRef.current?.update (); animatorRef.current?.reset () }, [])

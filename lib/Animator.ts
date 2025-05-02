@@ -16,7 +16,7 @@
  */
 import { type Rectangle } from 'two.js/src/shapes/rectangle'
 import { type Shape } from 'two.js/src/shape'
-import { type SVGPathProperties } from '../hooks/useMapWalkPath'
+import { type Walk } from './Walk'
 import Two from 'two.js'
 
 export type AnimationState = 'pause' | 'play'
@@ -29,7 +29,7 @@ export class Animator
   private _cursor: Shape
   private _cursorReady = true
   private _walked: number = 0
-  private _path: SVGPathProperties | undefined = undefined
+  private _walk: Walk | undefined = undefined
   private _step: number = 0
   private _two: Two
 
@@ -45,12 +45,12 @@ export class Animator
 
   private get _totalLength ()
     {
-      return this._path?.getTotalLength () ?? 0
+      return this._walk?.getTotalLength () ?? 0
     }
 
-  public set path (path: SVGPathProperties)
+  public set walk (walk: Walk)
     {
-      this._path = path
+      this._walk = walk
       this._renderAt (0)
     }
 
@@ -94,7 +94,7 @@ export class Animator
   private _render ()
     {
       let length: number
-      if (! this._path) return
+      if (! this._walk) return
 
       const at = this._walked
       const next = at + this._step * (length = this._totalLength)
@@ -106,7 +106,7 @@ export class Animator
   private _renderAt (at: number)
     {
 
-      const next = this._path!.getPropertiesAtLength (at)
+      const next = this._walk!.getPropertiesAtLength (at)
 
       this._cursor.rotation = Math.atan2 (next.tangentY, next.tangentX)
       this._cursor.translation.set (next.x, next.y)

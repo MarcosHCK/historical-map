@@ -19,11 +19,23 @@ import { JsonInput } from './JsonInput'
 export const input = new JsonInput (schema)
 export default input
 
+export interface ActionDescription
+{
+  name: string,
+}
+
 export interface MapDescription
 {
   cursor?: string,
   scale?: number,
+  spots?: SpotDescription[],
   textureFile: string,
   version: string,
   walkFile: string,
+}
+
+export interface SpotDescription
+{
+  actions: ActionDescription[],
+  code: string,
 }
