@@ -74,9 +74,9 @@ export class Walk
           const d1 = distance2 (at, [ p1.x, p1.y ])
           const d2 = distance2 (at, [ p2.x, p2.y ])
 
-          if (d1 < d2) right = t2; else left = t1
+          if (d1 >= d2) left = t1; else right = t2
         }
-      return (right - left) / 2
+      return (right + left) / 2
     }
 
   constructor (path: string, spots: Spot[])
