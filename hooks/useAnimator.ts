@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+'use client';
 import { type AnimationState, Animator } from '../lib/Animator'
 import { type MapDescription } from '../lib/MapDescription'
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
@@ -36,6 +37,7 @@ export type UseAnimatorResult =
 
 export interface UseAnimatorArgs extends Omit<MapDescription, 'textureFile' | 'version' | 'walkFile'>
 {
+  onSpot?: (code: string) => void,
   pace?: number,
   texture?: string,
   walk?: Walk,
@@ -43,7 +45,7 @@ export interface UseAnimatorArgs extends Omit<MapDescription, 'textureFile' | 'v
 
 export function useAnimator (desc: UseAnimatorArgs): UseAnimatorResult
 {
-  const { cursor, pace = 1, texture, walk } = desc
+  const { cursor, onSpot, pace = 1, texture, walk } = desc
   const animatorRef = useRef<Animator> (null)
   const canvasRef = useRef<HTMLCanvasElement> (null)
   const [ ready, setReady ] = useState<boolean> (true)
@@ -70,6 +72,12 @@ export function useAnimator (desc: UseAnimatorArgs): UseAnimatorResult
       setReady (animatorRef.current?.backgroundReady === true &&
                 animatorRef.current?.cursorReady === true )
     }, [animatorRef.current?.backgroundReady, animatorRef.current?.cursorReady])
+
+  useEffect (() => { if (onSpot)
+    { const watcher = animatorRef.current?.onSpot?.connect (onSpot);
+      return ! watcher ? undefined : () =>
+                      animatorRef.current?.onSpot?.disconnect (watcher) }}
+    , [onSpot])
 
   useEffect (() => { if (cursor) animatorRef.current?.setCursor (cursor) }, [cursor])
   useEffect (() => { if (texture) animatorRef.current?.setBackground (texture) }, [texture])

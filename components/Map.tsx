@@ -44,7 +44,7 @@ export const MapCanvas = ({ cursor, scale, spots, texture, walk }: MapCanvasProp
   const [ showControl, fireShowControl ] = useTrigger (false, true, controlTimeout)
   const [ velocity, setVelocity ] = useState (100)
   const [ ref, { pause, play, present, ready: _ready, reset } ] = useAnimator (
-    { cursor, pace: scale * velocity / 100, spots, texture, walk })
+    { cursor, onSpot: c => console.log (`hit ${c}`), pace: scale * velocity / 100, spots, texture, walk })
   const { ref: overlayRef, hovered: hoverBar } = useHover ()
   const ready = useMemo (() => !! cursor && !! texture && !! walk && _ready, [_ready, cursor, texture, walk])
 

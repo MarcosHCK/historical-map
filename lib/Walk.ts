@@ -45,6 +45,23 @@ export class Walk
       return this._path.getPropertiesAtLength (at)
     }
 
+  public getSpotAtInterval (from: number, to: number)
+    {
+      let left = 0
+      let right = this._spots.length - 1
+
+      while (right >= left)
+        {
+          const mid = Math.floor ((left + right) / 2)
+          const { at, code } = this._spots[mid]
+
+          if (at < from) left = mid + 1
+          else if (at > to) right = mid - 1
+          else return code
+        }
+      return null
+    }
+
   public getTangentAtLength (at: number)
     {
       return this._path.getTangentAtLength (at)

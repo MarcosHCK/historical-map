@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+import { Hooks } from './Hooks'
 import { type Rectangle } from 'two.js/src/shapes/rectangle'
 import { type Shape } from 'two.js/src/shape'
 import { type Walk } from './Walk'
@@ -28,10 +29,12 @@ export class Animator
   private _canvas: HTMLCanvasElement
   private _cursor: Shape
   private _cursorReady = true
-  private _walked: number = 0
-  private _walk: Walk | undefined = undefined
+  private _lastPoint: number = -1
+  private _onSpot = new Hooks<[string], void> ()
   private _step: number = 0
   private _two: Two
+  private _walk: Walk | undefined = undefined
+  private _walked: number = 0
 
   public get backgroundReady ()
     {
@@ -88,6 +91,9 @@ export class Animator
       this._two.clear ()
     }
 
+  public onSpot = { connect: (callback: (code: string) => void) => this._onSpot.add (callback),
+                    disconnect: (id: number) => this._onSpot.del (id) }
+
   pause () { this._two.pause () }
   play () { this._two.play () }
 
@@ -99,7 +105,12 @@ export class Animator
       const at = this._walked
       const next = at + this._step * (length = this._totalLength)
 
+      let spot: string | null
+      if ((spot = this._walk.getSpotAtInterval (this._lastPoint, at)) != null)
+        { this._onSpot.call (spot); }
+
       this._renderAt (at)
+      this._lastPoint = next > length ? -1 : at
       this._walked = next > length ? 0 : next
     }
 
@@ -115,6 +126,7 @@ export class Animator
   reset ()
     {
       this._walked = 0
+      this._lastPoint = 0
       this._two.update ()
     }
 
