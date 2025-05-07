@@ -14,44 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+'use client';
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { useNotification } from './useNotification'
+import input, { type MapDescriptor } from '../lib/MapDescriptor'
 
-.canvasCenter
+export const useMapDescriptor = (url: string) =>
 {
-  left: 0;
-  min-height: 100%;
-  min-width: 100%;
-  position: absolute;
-  top: 0;
-  z-index: 2;
-}
+  const notify = useNotification ()
 
-.canvasContainer
-{
-  height: fit-content;
-  position: relative;
-  width: fit-content;
-}
-
-.canvasGroup
-{
-  background-color: var(--mantine-color-gray-9);
-  bottom: 0;
-  left: 0;
-  min-width: 100%;
-  opacity: 0.70;
-  position: absolute;
-  z-index: 3;
-}
-
-.canvasSpotPointer
-{
-  position: absolute;
-}
-
-.controlButton
-{
-  &[data-loading]::before
+  const { data: index, error } = useQuery (
     {
-      opacity: 0 !important;
-    }
+      placeholderData: keepPreviousData,
+      queryFn: async () => input.fetch<MapDescriptor> (url),
+      queryKey: [ 'map', 'descriptor', url ],
+    })
+
+  useEffect (() => { if (error) notify.push (error) }, [error, notify])
+return index
 }

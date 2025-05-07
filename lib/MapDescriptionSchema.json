@@ -1,7 +1,7 @@
 {
   "$defs":
     {
-      "ActionDescription":
+      "ActionDescriptor":
         {
           "additionalProperties": false,
           "properties":
@@ -11,14 +11,14 @@
           "required": [ "name" ],
           "type": "object"
         },
-      "MapDescription":
+      "MapDescriptor":
         {
           "additionalProperties": false,
           "properties":
             {
               "cursor": { "format": "uri-relative", "type": "string" },
               "scale": { "type": "number" },
-              "spots": { "items": { "$ref": "#/$defs/SpotDescription" }, "type": "array" },
+              "spots": { "items": { "$ref": "#/$defs/SpotDescriptor" }, "type": "array" },
               "textureFile": { "format": "uri-relative", "type": "string" },
               "version": { "pattern": "^[0-9]+\\.[0-9]+$", "type": "string" },
               "walkFile": { "format": "uri-relative", "type": "string" }
@@ -26,18 +26,46 @@
           "required": [ "textureFile", "version", "walkFile" ],
           "type": "object"
         },
-      "SpotDescription":
+      "PopoverSpotOptions":
         {
           "additionalProperties": false,
           "properties":
             {
-              "actions": { "items": { "$ref": "#/$defs/ActionDescription" }, "type": "array" },
-              "code": { "maxLength": 7, "minLength": 7, "pattern": "^#[0-9a-f]{6}$", "type": "string" }
+              "pointerRadius": { "minimum": 0, "type": "number" }
             },
-          "required": [ "actions", "code" ],
+          "type": "object"
+        },
+      "SpotDescriptor":
+        {
+          "additionalProperties": false,
+          "properties":
+            {
+              "actions": { "items": { "$ref": "#/$defs/ActionDescriptor" }, "type": "array" },
+              "code": { "maxLength": 7, "minLength": 7, "pattern": "^#[0-9a-f]{6}$", "type": "string" },
+              "options": { "$ref": "#/$defs/SpotDescriptorOptions" }
+            },
+          "required": [ "actions", "code", "options" ],
+          "type": "object"
+        },
+      "SpotDescriptorOptions":
+        {
+          "additionalProperties": false,
+          "allOf":
+            [
+              {
+                "if": { "properties": { "type": { "const": "popover" } } },
+                "then": { "properties": { "value": { "$ref": "#/$defs/PopoverSpotOptions" } } }
+              }
+            ],
+          "properties":
+            {
+              "type": { "enum": [ "popover" ], "type": "string" },
+              "value": { }
+            },
+          "required": [ "value", "type" ],
           "type": "object"
         }
     },
-  "$ref": "#/$defs/MapDescription",
+  "$ref": "#/$defs/MapDescriptor",
   "$schema": "http://json-schema.org/draft-07/schema#"
 }

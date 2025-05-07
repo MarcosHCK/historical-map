@@ -14,28 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import schema from './MapDescriptionSchema.json'
-import { JsonInput } from './JsonInput'
-export const input = new JsonInput (schema)
-export default input
 
-export interface ActionDescription
+export function mapMap<R, K extends number | string | symbol, V> (map: Map<K, V>, mapFn: (v: V, i: number) => R)
 {
-  name: string,
-}
+  const ar: R[] = [ ]
 
-export interface MapDescription
-{
-  cursor?: string,
-  scale?: number,
-  spots?: SpotDescription[],
-  textureFile: string,
-  version: string,
-  walkFile: string,
-}
-
-export interface SpotDescription
-{
-  actions: ActionDescription[],
-  code: string,
+  let i = 0
+  map.forEach (v => { ar.push (mapFn (v, i++)) })
+return ar
 }

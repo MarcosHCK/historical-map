@@ -15,14 +15,16 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Button, Center, Group, Overlay, Popover, Skeleton, Slider, Stack, Transition } from '@mantine/core'
+import { mapMap } from '../lib/Array'
 import { PiFastForwardFill, PiPauseFill, PiPlayFill, PiStopFill } from 'react-icons/pi'
-import { type MapDescription } from '../lib/MapDescription'
+import { type ActionDescriptor, useSpotStore } from '../hooks/useSpotStore'
+import { type PopoverSpotOptions, type SpotDescriptorOptions, type MapDescriptor } from '../lib/MapDescriptor'
 import { type Walk } from '../lib/Walk'
 import { useAnimator } from '../hooks/useAnimator'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDebouncedValue, useDisclosure, useHover } from '@mantine/hooks'
 import { useHRef } from '../hooks/useHRef'
-import { useMapDescription } from '../hooks/useMapDescription'
+import { useMapDescriptor } from '../hooks/useMapDescriptor'
 import { useMapWalkPath } from '../hooks/useMapWalkPath'
 import { useTrigger } from '../hooks/useTrigger'
 import css from './Map.module.css'
@@ -30,7 +32,38 @@ import css from './Map.module.css'
 const controlTimeout = 170
 const transitionTime = 70
 
-export interface MapCanvasProps extends Omit<MapDescription, 'textureFile' | 'version' | 'walkFile'>
+function PopoverSpotWidget ({ position, radius = 21 }: PopoverSpotOptions & { position: ActionDescriptor['position'] })
+{
+  const { ref, hovered } = useHover ()
+  const [ height, width ] = [ radius, radius ]
+  const [ left, top ] = position
+
+  return <Popover opened={hovered}>
+
+    <Popover.Target>
+
+      <span className={css.canvasSpotPointer} ref={ref} style={{ height, left, top, width }} />
+    </Popover.Target>
+
+    <Popover.Dropdown>
+      lakjdlakjdlkjdasa
+    </Popover.Dropdown>
+  </Popover>
+}
+
+function SpotWidget ({ position, options, type }: { options: SpotDescriptorOptions['value'],
+                                                   position: ActionDescriptor['position'] | undefined,
+                                                       type: SpotDescriptorOptions['type'] })
+{
+
+  if (!! position) switch (type)
+    {
+      case 'popover': return <PopoverSpotWidget {...(options as PopoverSpotOptions)} position={position} />
+      default: throw Error (`unknown spot ${type}`)
+    }
+}
+
+export interface MapCanvasProps extends Omit<MapDescriptor, 'textureFile' | 'version' | 'walkFile'>
 {
   scale: number,
   texture?: string,
@@ -39,12 +72,13 @@ export interface MapCanvasProps extends Omit<MapDescription, 'textureFile' | 've
 
 export const MapCanvas = ({ cursor, scale, spots, texture, walk }: MapCanvasProps) =>
 {
+  const { actions, onSpot, scaleMultiplier } = useSpotStore (spots, walk)
   const [ playing, { close, toggle } ] = useDisclosure (false)
   const [ debouncedPlaying ] = useDebouncedValue (playing, controlTimeout)
   const [ showControl, fireShowControl ] = useTrigger (false, true, controlTimeout)
   const [ velocity, setVelocity ] = useState (100)
   const [ ref, { pause, play, present, ready: _ready, reset } ] = useAnimator (
-    { cursor, onSpot: c => console.log (`hit ${c}`), pace: scale * velocity / 100, spots, texture, walk })
+    { cursor, onSpot, pace: scale * scaleMultiplier * velocity / 100, spots, texture, walk })
   const { ref: overlayRef, hovered: hoverBar } = useHover ()
   const ready = useMemo (() => !! cursor && !! texture && !! walk && _ready, [_ready, cursor, texture, walk])
 
@@ -130,6 +164,8 @@ export const MapCanvas = ({ cursor, scale, spots, texture, walk }: MapCanvasProp
         </Group> }
       </Transition>
 
+      { mapMap (actions, (v, i) => <SpotWidget key={i} options={v.options.value} position={v.position} type={v.options.type} />) }
+
       <Center className={css.canvasCenter} onClick={toggleAnimation}>
 
         <Transition duration={transitionTime} mounted={! playing || showControl} transition='fade'>
@@ -145,11 +181,11 @@ export const MapCanvas = ({ cursor, scale, spots, texture, walk }: MapCanvasProp
 
 const MapMain = ({ meta }: { meta: string }) =>
 {
-  const desc = useMapDescription (useHRef (meta)!)
+  const desc = useMapDescriptor (useHRef (meta)!)
   const walk = useMapWalkPath (useHRef (desc?.walkFile))
   const cursor = useMemo (() => desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg'), [desc])
 
-  return <MapCanvas cursor={useHRef (cursor)} texture={useHRef (desc?.textureFile)} scale={desc?.scale ?? 1} walk={walk} />
+  return <MapCanvas cursor={useHRef (cursor)} texture={useHRef (desc?.textureFile)} scale={desc?.scale ?? 1} spots={desc?.spots} walk={walk} />
 }
 
 export { MapMain as Map }

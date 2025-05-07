@@ -14,23 +14,40 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-'use client';
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
-import { useNotification } from './useNotification'
-import input, { type MapDescription } from '../lib/MapDescription'
+import schema from './MapDescriptionSchema.json'
+import { JsonInput } from './JsonInput'
+export const input = new JsonInput (schema)
+export default input
 
-export const useMapDescription = (url: string) =>
+export interface ActionDescriptor
 {
-  const notify = useNotification ()
+  name: string,
+}
 
-  const { data: index, error } = useQuery (
-    {
-      placeholderData: keepPreviousData,
-      queryFn: async () => input.fetch<MapDescription> (url),
-      queryKey: [ 'map', 'description', url ],
-    })
+export interface MapDescriptor
+{
+  cursor?: string,
+  scale?: number,
+  spots?: SpotDescriptor[],
+  textureFile: string,
+  version: string,
+  walkFile: string,
+}
 
-  useEffect (() => { if (error) notify.push (error) }, [error, notify])
-return index
+export interface PopoverSpotOptions
+{
+  radius?: number,
+}
+
+export interface SpotDescriptor
+{
+  actions: ActionDescriptor[],
+  code: string,
+  options: SpotDescriptorOptions,
+}
+
+export interface SpotDescriptorOptions
+{
+  type: 'popover',
+  value: PopoverSpotOptions,
 }

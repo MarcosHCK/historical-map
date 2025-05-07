@@ -16,7 +16,7 @@
  */
 'use client';
 import { type AnimationState, Animator } from '../lib/Animator'
-import { type MapDescription } from '../lib/MapDescription'
+import { type MapDescriptor } from '../lib/MapDescriptor'
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { type Walk } from '../lib/Walk'
 
@@ -35,7 +35,7 @@ export type UseAnimatorResult =
   AnimatorControls,
 ]
 
-export interface UseAnimatorArgs extends Omit<MapDescription, 'textureFile' | 'version' | 'walkFile'>
+export interface UseAnimatorArgs extends Omit<MapDescriptor, 'textureFile' | 'version' | 'walkFile'>
 {
   onSpot?: (code: string) => void,
   pace?: number,
