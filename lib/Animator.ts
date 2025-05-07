@@ -25,10 +25,8 @@ export type AnimationState = 'pause' | 'play'
 export class Animator
 {
   private _background: Rectangle
-  private _backgroundReady = true
   private _canvas: HTMLCanvasElement
   private _cursor: Shape
-  private _cursorReady = true
   private _lastPoint: number = -1
   private _onSpot = new Hooks<[string], void> ()
   private _step: number = 0
@@ -36,19 +34,40 @@ export class Animator
   private _walk: Walk | undefined = undefined
   private _walked: number = 0
 
-  public get backgroundReady ()
-    {
-      return this._backgroundReady
-    }
-
-  public get cursorReady ()
-    {
-      return this._cursorReady
-    }
-
   private get _totalLength ()
     {
       return this._walk?.getTotalLength () ?? 0
+    }
+
+  public set background (img: HTMLImageElement)
+    {
+      this._two.height = (this._canvas.height = img.height)
+      this._two.width = (this._canvas.width = img.width)
+      this._two.renderer.setSize (img.width, img.height)
+
+      this._background.fill = this._two.makeTexture (img)
+      this._background.noStroke ()
+      this._background.translation.set (img.width / 2, img.height / 2)
+      this._background.height = img.height
+      this._background.width = img.width
+      this._background.scale = 1
+      this._background.opacity = 1;
+      (this._cursor as Rectangle).height = this._cursorSize;
+      (this._cursor as Rectangle).width = this._cursorSize
+    }
+
+  public set cursor (img: HTMLImageElement)
+    {
+      let rect: Rectangle
+      const size = this._cursorSize
+      const texture = this._two.makeTexture (img)
+
+      this._cursor.remove ()
+      this._cursor = (rect = this._two.makeSprite (texture, 0, 0))
+
+      rect.noStroke ()
+      rect.opacity = 1
+      rect.scale = new Two.Vector (size / img.width, size / img.height)
     }
 
   public set walk (walk: Walk)
@@ -128,61 +147,6 @@ export class Animator
       this._walked = 0
       this._lastPoint = 0
       this._two.update ()
-    }
-
-  setBackground (url: string)
-    {
-      const img = new Image ()
-      const two = this._two
-
-      this._backgroundReady = false
-
-      img.onload = () =>
-        {
-
-          two.height = (this._canvas.height = img.height)
-          two.width = (this._canvas.width = img.width)
-          two.renderer.setSize (img.width, img.height)
-
-          this._background.fill = two.makeTexture (img)
-          this._background.noStroke ()
-          this._background.translation.set (two.width / 2, two.height / 2)
-          this._background.height = img.height
-          this._background.width = img.width
-          this._background.scale = 1
-          this._background.opacity = 1;
-          (this._cursor as Rectangle).height = this._cursorSize;
-          (this._cursor as Rectangle).width = this._cursorSize
-          this._backgroundReady = true
-        }
-
-      img.src = url
-    }
-
-  setCursor (url: string)
-    {
-      const two = this._two
-      const img = new Image ()
-
-      this._cursorReady = false
-
-      img.onload = () =>
-        {
-
-          let rect: Rectangle
-          const size = this._cursorSize
-          const texture = two.makeTexture (img)
-
-          this._cursor.remove ()
-          this._cursor = (rect = this._two.makeSprite (texture, 0, 0))
-
-          rect.noStroke ()
-          rect.opacity = 1
-          rect.scale = new Two.Vector (size / img.width, size / img.height)
-          this._cursorReady = true
-        }
-
-      img.src = url
     }
 
   update () { this._two.update () }

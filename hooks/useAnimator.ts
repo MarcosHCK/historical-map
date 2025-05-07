@@ -16,17 +16,15 @@
  */
 'use client';
 import { type AnimationState, Animator } from '../lib/Animator'
-import { type MapDescriptor } from '../lib/MapDescriptor'
+import { type Map } from '../lib/Map';
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
-import { type Walk } from '../lib/Walk'
 
 export interface AnimatorControls
 {
   pause: () => void,
   play: () => void,
-  present: () => void,
-  ready: boolean,
   reset: () => void,
+  state: AnimationState,
 }
 
 export type UseAnimatorResult =
@@ -35,20 +33,18 @@ export type UseAnimatorResult =
   AnimatorControls,
 ]
 
-export interface UseAnimatorArgs extends Omit<MapDescriptor, 'textureFile' | 'version' | 'walkFile'>
+export interface UseAnimatorArgs
 {
+  map?: Map,
   onSpot?: (code: string) => void,
   pace?: number,
-  texture?: string,
-  walk?: Walk,
 }
 
-export function useAnimator (desc: UseAnimatorArgs): UseAnimatorResult
+export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
 {
-  const { cursor, onSpot, pace = 1, texture, walk } = desc
+  const { map, onSpot, pace = 1 } = args
   const animatorRef = useRef<Animator> (null)
   const canvasRef = useRef<HTMLCanvasElement> (null)
-  const [ ready, setReady ] = useState<boolean> (true)
   const [ state, setState ] = useState<AnimationState> ('pause')
 
   useEffect (() =>
@@ -61,17 +57,14 @@ export function useAnimator (desc: UseAnimatorArgs): UseAnimatorResult
       return () => animator.cleanup ()
     }, [])
 
-  useEffect (() => { switch (state)
+  useEffect (() => { let animator: Animator | null; if (map && (animator = animatorRef.current))
     {
-      case 'pause': animatorRef.current?.pause (); break;
-      case 'play': animatorRef.current?.play (); break;
-    }}, [state])
-
-  useEffect (() =>
-    {
-      setReady (animatorRef.current?.backgroundReady === true &&
-                animatorRef.current?.cursorReady === true )
-    }, [animatorRef.current?.backgroundReady, animatorRef.current?.cursorReady])
+      animator.background = map.texture
+      animator.cursor = map.cursor
+      animator.walk = map.walk
+      animator.update ()
+      animator.reset ()
+    }}, [map])
 
   useEffect (() => { if (onSpot)
     { const watcher = animatorRef.current?.onSpot?.connect (onSpot);
@@ -79,13 +72,18 @@ export function useAnimator (desc: UseAnimatorArgs): UseAnimatorResult
                       animatorRef.current?.onSpot?.disconnect (watcher) }}
     , [onSpot])
 
-  useEffect (() => { if (cursor) animatorRef.current?.setCursor (cursor) }, [cursor])
-  useEffect (() => { if (texture) animatorRef.current?.setBackground (texture) }, [texture])
-  useEffect (() => { if (walk) animatorRef.current!.walk = walk }, [walk])
-  useEffect (() => { animatorRef.current!.step = pace }, [pace])
+  useEffect (() =>
+    {
+      if (animatorRef.current) animatorRef.current.step = pace * (map?.scale ?? 1)
+    }, [map, pace])
 
-  const present = useCallback (() => { animatorRef.current?.update (); animatorRef.current?.reset () }, [])
+  useEffect (() => { switch (state)
+    {
+      case 'pause': animatorRef.current?.pause (); break;
+      case 'play': animatorRef.current?.play (); break;
+    }}, [state])
+
   const reset = useCallback (() => { animatorRef.current?.reset () }, [])
 
-return [ canvasRef, { pause: () => setState ('pause'), present, play: () => setState ('play'), ready, reset } ]
+return [ canvasRef, { pause: () => setState ('pause'), play: () => setState ('play'), reset, state } ]
 }
