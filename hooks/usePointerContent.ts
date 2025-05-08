@@ -14,39 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+import { type PointerContent } from '../lib/MapDescriptor'
+// import { useHRef } from './useHRef'
+// import { useImage } from './useImage'
+import { useMemo, type CSSProperties } from 'react'
 
-.canvasCenter
+export function usePointerContent (content?: PointerContent): CSSProperties
 {
-  left: 0;
-  min-height: 100%;
-  min-width: 100%;
-  position: absolute;
-  top: 0;
-  z-index: 2;
-}
+  const { type, value } = content ?? ({ type: 'color', value: 'black' } as const)
+  // TODO: add support for this
+  // const img = useImage (useHRef (! (content && type === 'image') ? undefined : value))
 
-.canvasContainer
-{
-  height: fit-content;
-  position: relative;
-  width: fit-content;
-}
-
-.canvasGroup
-{
-  background-color: var(--mantine-color-gray-9);
-  bottom: 0;
-  left: 0;
-  min-width: 100%;
-  opacity: 0.70;
-  position: absolute;
-  z-index: 3;
-}
-
-.controlButton
-{
-  &[data-loading]::before
+  return useMemo (() => { if (! value) return { }; else switch (type)
     {
-      opacity: 0 !important;
-    }
+      case 'color': return { backgroundColor: value }
+      case 'image': return { }
+    }}, [type, value])
 }

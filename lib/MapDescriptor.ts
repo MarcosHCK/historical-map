@@ -24,6 +24,16 @@ export interface ActionDescriptor
   name: string,
 }
 
+export interface Image
+{
+  alt?: string,
+  height?: number,
+  src: string,
+  width?: number,
+}
+
+export type ImageImport = string | Image
+
 export interface MapDescriptor
 {
   cursor?: string,
@@ -34,9 +44,34 @@ export interface MapDescriptor
   walkFile: string,
 }
 
+export interface PointerContent
+{
+  type: 'color' | 'image',
+  value: PointerContentColor | PointerContentImage,
+}
+
+export type PointerContentColor = string
+export type PointerContentImage = ImageImport
+
 export interface PopoverSpotOptions
 {
-  radius?: number,
+  content: SpotContent | SpotContent[],
+  pointerContent?: PointerContent,
+  pointerRadius?: number,
+  popoverHeight?: number,
+  popoverWidth?: number,
+}
+
+export interface SpotContent
+{
+  options?: SpotContentOptions,
+  type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'hr' | 'img' | 'p',
+  value: number | string | ImageImport,
+}
+
+export interface SpotContentOptions
+{
+  centered?: boolean,
 }
 
 export interface SpotDescriptor
@@ -51,3 +86,12 @@ export interface SpotDescriptorOptions
   type: 'popover',
   value: PopoverSpotOptions,
 }
+
+export interface Text
+{
+  alt?: 'none' | 'skeleton',
+  src: string,
+  type: 'plain',
+}
+
+export type TextImport = string | Text

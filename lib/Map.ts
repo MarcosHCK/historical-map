@@ -31,6 +31,7 @@ class MapClass
 
   public get cursor () { return this._cursor }
   public get scale () { return this._scale }
+  public get spots () { return this._spots }
   public get texture () { return this._texture }
   public get walk () { return this._walk }
 

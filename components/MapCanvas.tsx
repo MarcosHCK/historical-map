@@ -15,6 +15,8 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Button, Center, Group, Overlay, Popover, Skeleton, Slider, Stack, Transition } from '@mantine/core'
+import { mapMap } from '../lib/Array'
+import { MapSpot } from './MapSpot'
 import { PiFastForwardFill, PiPauseFill, PiPlayFill, PiStopFill } from 'react-icons/pi'
 import { type AnimationState } from '../lib/Animator'
 import { type Map } from '../lib/Map'
@@ -119,6 +121,8 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
           </Popover>
         </Group> }
       </Transition>
+
+      { map && mapMap (map.spots, (spot, i) => <MapSpot key={i} spot={spot} />) }
 
       <Center className={css.canvasCenter} onClick={() => toggleAnimation (state)}>
 

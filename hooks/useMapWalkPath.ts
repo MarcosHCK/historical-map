@@ -55,6 +55,34 @@ function collectAttributeOrStyle (elm: SVGCircleElement, field: string)
         { cause: 'parsing' })
 }
 
+function n2hex (n: number)
+{
+  const s = n.toString (16)
+return 2 === s.length ? s : `0${s}`
+}
+
+const colorPattern = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/
+
+function parseColor (color: string)
+{
+  let match: null | RegExpMatchArray
+
+  if ((match = color.match (colorPattern)) === null)
+
+    throw Error (`bad color value '${color}'`)
+  else
+    {
+      const [, r, g, b, a ] = match
+
+      if (! a || a === '1')
+
+        return `#${n2hex (parseInt (r))}${n2hex (parseInt (g))}${n2hex (parseInt (b))}`
+      else
+        { const alpha = Math.round (parseFloat (a) * 255.0)
+          return `#${n2hex (parseInt (r))}${n2hex (parseInt (g))}${n2hex (parseInt (b))}${n2hex (alpha)}` }
+    }
+}
+
 function collectCircles (nodes: NodeListOf<SVGCircleElement>)
 {
   const circles: Spot[] = []
@@ -64,7 +92,7 @@ function collectCircles (nodes: NodeListOf<SVGCircleElement>)
       const cd = collectAttributeOrStyle (circle, 'fill')
       const cx = Number (collectAttribute (circle, 'cx'))
       const cy = Number (collectAttribute (circle, 'cy'))
-      circles.push ({ at: [ cx, cy ], code: cd }) }
+      circles.push ({ at: [ cx, cy ], code: parseColor (cd) }) }
 return circles
 }
 

@@ -15,38 +15,11 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.canvasCenter
+export function mapMap<R, K extends number | string | symbol, V> (map: Map<K, V>, mapFn: (v: V, i: number) => R)
 {
-  left: 0;
-  min-height: 100%;
-  min-width: 100%;
-  position: absolute;
-  top: 0;
-  z-index: 2;
-}
+  const ar: R[] = [ ]
 
-.canvasContainer
-{
-  height: fit-content;
-  position: relative;
-  width: fit-content;
-}
-
-.canvasGroup
-{
-  background-color: var(--mantine-color-gray-9);
-  bottom: 0;
-  left: 0;
-  min-width: 100%;
-  opacity: 0.70;
-  position: absolute;
-  z-index: 3;
-}
-
-.controlButton
-{
-  &[data-loading]::before
-    {
-      opacity: 0 !important;
-    }
+  let i = 0
+  map.forEach (v => { ar.push (mapFn (v, i++)) })
+return ar
 }
