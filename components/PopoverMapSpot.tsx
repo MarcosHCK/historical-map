@@ -14,30 +14,52 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Popover } from '@mantine/core'
+import { Popover, rem, ScrollArea } from '@mantine/core'
 import { type Spot } from '../lib/Spot'
+import { useEffect, useState } from 'react'
 import { useHover } from '@mantine/hooks'
 import { usePointerContent } from '../hooks/usePointerContent'
 import css from './MapSpot.module.css'
 
+function useEaseOutValue (value: boolean, wait: number)
+{
+  const [ debounced, setDebounced ] = useState (value)
+
+  useEffect (() =>
+    {
+      if (value) setDebounced (true)
+            else { const timer = setTimeout (() => setDebounced (false), wait)
+                   return () => clearTimeout (timer) }
+    }, [value, wait])
+return debounced
+}
+
 export function PopoverMapSpot ({ children, spot }: { children?: React.ReactNode, spot: Spot })
 {
-  const { ref: pointerRef, hovered } = useHover ()
+  const { ref: dropDownRef, hovered: hovered1 } = useHover ()
+  const { ref: pointerRef, hovered: hovered2 } = useHover ()
   const radius = spot.options.pointerRadius ?? 13
   const pointerStyle = usePointerContent (spot.options.pointerContent)
   const [ height, width ] = [ radius, radius ]
   const [ left, top ] = spot.position.map (e => e - radius / 2)
 
-  return <Popover opened={hovered}>
+  return <Popover opened={useEaseOutValue (hovered1 || hovered2, 200)}>
 
     <Popover.Target>
 
       <div className={css.mapSpotPointer} ref={pointerRef} style={{ ...pointerStyle, height, left, top, width }} />
     </Popover.Target>
 
-    <Popover.Dropdown mah={spot.options.popoverHeight} maw={spot.options.popoverWidth}
-                      mih={spot.options.popoverHeight} miw={spot.options.popoverWidth}>
-      { children }
+    <Popover.Dropdown className={css.mapSpotPopoverDropdown}
+                      mah={spot.options.popoverHeight} maw={spot.options.popoverWidth}
+                      mih={spot.options.popoverHeight} miw={spot.options.popoverWidth}
+                      ref={dropDownRef}
+                      style={{ ['--spot-popover-height']: rem (spot.options.popoverHeight),
+                               ['--spot-popover-width']: rem (spot.options.popoverWidth) }} >
+
+      <ScrollArea.Autosize className={css.mapSpotPopoverScrollArea} scrollbarSize={5} overscrollBehavior='none' type='hover'>
+        { children }
+      </ScrollArea.Autosize>
     </Popover.Dropdown>
   </Popover>
 }

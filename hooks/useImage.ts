@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+'use client';
 import { useEffect } from 'react'
 import { useNotification } from './useNotification'
 import { useQuery } from '@tanstack/react-query'

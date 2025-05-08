@@ -91,7 +91,7 @@ export interface Text
 {
   alt?: 'none' | 'skeleton',
   src: string,
-  type: 'plain',
+  type: 'html' | 'plain',
 }
 
 export type TextImport = string | Text

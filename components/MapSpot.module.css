@@ -15,6 +15,10 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 
+.mapSpotContent
+{
+}
+
 .mapSpotContentWrapper
 {
   min-width: 100%;
@@ -25,4 +29,17 @@
   position: absolute;
   border-radius: 100%;
   z-index: 3;
+}
+
+.mapSpotPopoverDropdown
+{
+  --spot-popover-padding-bottom-top: var(--mantine-spacing-sm);
+  --spot-popover-padding-left-right: var(--mantine-spacing-md);
+  padding: var(--spot-popover-padding-bottom-top)
+           var(--spot-popover-padding-left-right);
+}
+
+.mapSpotPopoverScrollArea
+{
+  height: calc(var(--spot-popover-height)- var(--spot-popover-padding-bottom-top) *2);
 }

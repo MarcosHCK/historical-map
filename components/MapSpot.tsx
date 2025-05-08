@@ -22,9 +22,9 @@ import { type Spot } from '../lib/Spot'
 import { type SpotContent } from '../lib/MapDescriptor'
 import { type SpotContentOptions } from '../lib/MapDescriptor'
 import { type Text as TextType, type TextImport } from '../lib/MapDescriptor'
+import { type UseTextReturn, useText } from '../hooks/useText'
 import { useHRef } from '../hooks/useHRef'
 import css from './MapSpot.module.css'
-import { useText } from '../hooks/useText'
 
 function aov2a<T> (aov: T | T[])
 {
@@ -41,11 +41,12 @@ function Inner ({ type, value }: SpotContent)
       case 'h3':
       case 'h4':
       case 'h5':
-      case 'h6': return <Paragraph import={value as TextImport}>
-          { c => <Text component={type} fz={type}>{ c }</Text> }
-        </Paragraph>
-      case 'p': return <Paragraph import={value as TextImport}>
-          { c => <Text component='p' fz='md'>{ c }</Text> }
+      case 'h6':
+      case 'p': return <Paragraph import={value as TextImport}>{ (c, t) => { switch (t)
+          {
+            case 'html': return <div dangerouslySetInnerHTML={{ __html: c as string }} />
+            case 'plain': return <Text component={type} fz={'p' === type ? 'md' : type}>{ c as string }</Text>
+          }}}
         </Paragraph>
       case 'hr': return <hr style={{ border: value as number }} />
       case 'img': return <Picture import={value as ImageImport} />
@@ -53,11 +54,12 @@ function Inner ({ type, value }: SpotContent)
     }
 }
 
-function Paragraph ({ children, import: import_ }: { children: (c: ReactNode, t: TextType['type']) => ReactNode, import: TextImport })
+function Paragraph ({ children, import: import_ }: { children: (c: UseTextReturn, t: TextType['type']) => ReactNode, import: TextImport })
 {
   const r = ! (import_ instanceof Object)
-  const text = useText (r ? undefined : (import_ as TextType).src, r ? undefined : (import_ as TextType).type)
-  return <>{ children (! r ? text : import_ as string, r ? 'plain' : (import_ as TextType).type) }</>
+  const type = useMemo (() => r ? 'plain' : (import_ as TextType).type, [r, import_])
+  const text = useText (r ? undefined : (import_ as TextType).src, type)
+  return <>{ children ((! r ? text : import_) as string, type) }</>
 }
 
 function Picture ({ import: import_ }: { import: ImageImport })
@@ -94,7 +96,7 @@ export function MapSpot ({ spot }: { spot: Spot })
 export function MapSpotContent ({ content }: { content: SpotContent | SpotContent[] })
 {
 
-  return <Stack>
+  return <Stack className={css.mapSpotContent}>
     { useMemo (() => aov2a (content), [content]).map ((s, i) => <Wrapper {...(s.options ?? { })} key={i}>
       <Inner {...s} /> </Wrapper>) }
   </Stack>

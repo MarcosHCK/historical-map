@@ -162,7 +162,7 @@
             {
               "alt": { "enum": [ "none", "skeleton" ], "type": "string" },
               "src": { "format": "uri-relative", "type": "string" },
-              "type": { "enum": [ "plain" ], "type": "string" }
+              "type": { "enum": [ "html", "plain" ], "type": "string" }
             },
           "required": [ "src" ],
           "type": "object"

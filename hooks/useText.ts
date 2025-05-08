@@ -14,9 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+'use client';
 import { useEffect } from 'react'
 import { useNotification } from './useNotification'
 import { useQuery } from '@tanstack/react-query'
+import { sanitize } from '../lib/sanitizeHtml';
 
 const fetchOptions: RequestInit =
 {
@@ -32,13 +34,15 @@ function textUrl (blob: Blob, type: TextFormat)
       reader.onloadend = () => resolve (reader.result as string)
       reader.onerror = reject
 
-      if (type === 'plain')
+      if (type === 'plain' || type === 'html')
 
         reader.readAsText (blob)
     })
 }
 
-export type TextFormat = 'plain'
+export type TextFormat = 'html' | 'plain'
+
+export type UseTextReturn = string | undefined
 
 export function useText (url?: string, type: TextFormat = 'plain')
 {
@@ -55,10 +59,15 @@ export function useText (url?: string, type: TextFormat = 'plain')
           if ((response = await fetch (url!, options)).status !== 200)
 
             throw Error (`'${url}' fetch error: ${response.status}`, { cause: 'fetch' })
-          else switch (type)
-            {
-              case 'plain': return await textUrl (await response.blob (), type)
-            }
+          else
+
+            switch (type)
+              {
+                case 'html': { const html = await textUrl (await response.blob (), type)
+                              return sanitize (html) }
+                case 'plain': return await textUrl (await response.blob (), type)
+                default: throw Error (`Unknown text format '${type}'`)
+              }
         },
       queryKey: [ 'text', 'blob', url, type ] })
 
