@@ -42,13 +42,14 @@ function Inner ({ type, value }: SpotContent)
       case 'h4':
       case 'h5':
       case 'h6':
-      case 'p': return <Paragraph import={value as TextImport}>{ (c, t) => { switch (t)
+      case 'p': return <Text component={type} fz={'p' === type ? 'md' : type}>{ value as string }</Text>
+      case 'hr': return <hr style={{ border: value as number }} />
+      case 'html': return <Paragraph import={value as TextImport}>{ (c, t) => { switch (t)
           {
             case 'html': return <div dangerouslySetInnerHTML={{ __html: c as string }} />
-            case 'plain': return <Text component={type} fz={'p' === type ? 'md' : type}>{ c as string }</Text>
-          }}}
-        </Paragraph>
-      case 'hr': return <hr style={{ border: value as number }} />
+            case 'plain': return <Text component='p'>{ c as string }</Text>
+            default: throw Error (`Unknown content type '${t}'`)
+          }}}</Paragraph>
       case 'img': return <Picture import={value as ImageImport} />
       default: throw Error (`Unknown content tag '${type}'`)
     }

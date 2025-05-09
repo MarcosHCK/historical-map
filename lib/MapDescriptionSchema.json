@@ -95,11 +95,15 @@
             [
               {
                 "if": { "properties": { "type": { "enum": [ "h1", "h2", "h3", "h4", "h5", "h6", "p" ] } } },
-                "then": { "properties": { "value": { "$ref": "#/$defs/TextImport" } } }
+                "then": { "properties": { "value": { "type": "string" } } }
               },
               {
-                "if": { "properties": { "type": { "enum": [ "hr" ] } } },
+                "if": { "properties": { "type": { "const": "hr" } } },
                 "then": { "properties": { "value": { "type": "number" } } }
+              },
+              {
+                "if": { "properties": { "type": { "const": "html" } } },
+                "then": { "properties": { "value": { "$ref": "#/$defs/TextImport" } } }
               },
               {
                 "if": { "properties": { "type": { "const": "img" } } },
@@ -109,7 +113,7 @@
           "properties":
             {
               "options": { "$ref": "#/$defs/SpotContentOptions" },
-              "type": { "enum": [ "h1", "h2", "h3", "h4", "h5", "h6", "hr", "img", "p" ], "type": "string" },
+              "type": { "enum": [ "h1", "h2", "h3", "h4", "h5", "h6", "hr", "html", "img", "p" ], "type": "string" },
               "value": { }
             },
           "required": [ "type", "value" ],
@@ -164,7 +168,7 @@
               "src": { "format": "uri-relative", "type": "string" },
               "type": { "enum": [ "html", "plain" ], "type": "string" }
             },
-          "required": [ "src" ],
+          "required": [ "src", "type" ],
           "type": "object"
         },
       "TextImport":
@@ -172,7 +176,7 @@
           "oneOf":
             [
               { "$ref": "#/$defs/Text" },
-              { "format": "uri-relative", "type": "string" }
+              { "type": "string" }
             ]
         }
     },

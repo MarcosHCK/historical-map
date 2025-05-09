@@ -65,7 +65,7 @@ export interface PopoverSpotOptions
 export interface SpotContent
 {
   options?: SpotContentOptions,
-  type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'hr' | 'img' | 'p',
+  type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'hr' | 'html' | 'img' | 'p',
   value: number | string | ImageImport,
 }
 
