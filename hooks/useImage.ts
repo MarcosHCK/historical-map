@@ -15,15 +15,9 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 'use client';
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNotification } from './useNotification'
 import { useQuery } from '@tanstack/react-query'
-
-const fetchOptions: RequestInit =
-{
-  headers: { 'Accept': 'image/svg+xml' },
-  method: 'GET',
-}
 
 function dataUrl (blob: Blob)
 {
@@ -35,6 +29,11 @@ function dataUrl (blob: Blob)
       reader.onerror = reject
       reader.readAsDataURL (blob)
     })
+}
+
+const fetchOptions: RequestInit =
+{
+  method: 'GET',
 }
 
 export type Image = HTMLImageElement
@@ -51,16 +50,17 @@ export function useImage (url?: string, mimeTypes = [ 'image/png', 'image/svg+xm
           const options = { ...fetchOptions, headers }
           let response: Response 
 
-          if ((response = await fetch (url!, options)).status !== 200)
+          if ((response = await fetch (url!, options)).status === 200)
 
-            throw Error (`'${url}' fetch error: ${response.status}`, { cause: 'fetch' })
+            return await dataUrl (await response.blob ())
           else
-            { const blob = await response.blob ()
-              const img = new Image ()
-              return (img.src = await dataUrl (blob), img) }
+            throw Error (`'${url}' fetch error: ${response.status}`, { cause: 'fetch' })
         },
       queryKey: [ 'image', 'blob', url, mimeTypes ] })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])
-return data
+
+  return useMemo (() =>
+    { let img: Image
+      return ! data ? undefined : (img = new Image (), img.src = data, img) }, [data])
 }

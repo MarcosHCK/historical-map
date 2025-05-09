@@ -21,6 +21,7 @@ import { useHRef } from '../hooks/useHRef'
 import { useImage } from '../hooks/useImage'
 import { useMapDescriptor } from '../hooks/useMapDescriptor'
 import { useMapWalkPath } from '../hooks/useMapWalkPath'
+import { useMemo } from 'react'
 
 const MapMain = ({ meta }: { meta: string }) =>
 {
@@ -28,6 +29,8 @@ const MapMain = ({ meta }: { meta: string }) =>
   const cursor = useImage (useHRef (desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg')))
   const texture = useImage (useHRef (desc?.textureFile))
   const walk = useMapWalkPath (useHRef (desc?.walkFile))
+  const map = useMemo (() => desc && cursor && texture && walk && new Map (desc, cursor, texture, walk),
+                            [desc, cursor, texture, walk])
 
-  return ! (desc && cursor && texture && walk) ? <MapCanvas /> : <MapCanvas map={new Map (desc, cursor, texture, walk)} />
+  return ! map ? <MapCanvas /> : <MapCanvas map={map} />
 }

@@ -17,7 +17,7 @@
 'use client';
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { type Spot, Walk } from '../lib/Walk'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNotification } from './useNotification'
 
 const fetchOptions: RequestInit =
@@ -100,7 +100,7 @@ export const useMapWalkPath = (url?: string) =>
 {
   const notify = useNotification ()
 
-  const { data: index, error } = useQuery (
+  const { data, error } = useQuery (
     {
       enabled: !! url,
       placeholderData: keepPreviousData,
@@ -109,26 +109,24 @@ export const useMapWalkPath = (url?: string) =>
           let code: number
           const response = await fetch (url!, fetchOptions)
 
-          if ((code = response.status) !== 200)
+          if ((code = response.status) === 200)
 
-            throw Error (`'${url}' fetch error: ${code}`, { cause: 'fetch' })
+            return await response.text ()
           else
-            {
-              const parser = new DOMParser ()
-              const doc = parser.parseFromString (await response.text (), 'image/svg+xml')
-              const path = doc.querySelector ('path')?.getAttribute ('d')
-              const spots = collectCircles (doc.querySelectorAll ('circle'))
-
-              try
-                { return new Walk (path!, spots) }
-              catch (error)
-                { throw new AggregateError ([ error ], 'invalid walk file', { cause: 'parsing' }) }
-            }
+            throw Error (`'${url}' fetch error: ${code}`, { cause: 'fetch' })
         },
-      queryKey: [ 'maps', 'index', url ],
-      throwOnError: true,
+      queryKey: [ 'map', 'walk', url ],
     })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])
-return index
+
+  return useMemo (() => { if (! data) return undefined; else try
+    {
+      const parser = new DOMParser ()
+      const doc = parser.parseFromString (data, 'image/svg+xml')
+      const path = doc.querySelector ('path')?.getAttribute ('d')
+      const spots = collectCircles (doc.querySelectorAll ('circle'))
+      return new Walk (path!, spots)
+    } catch (error) { notify.push (error)
+    }}, [data, notify])
 }
