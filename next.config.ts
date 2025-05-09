@@ -20,6 +20,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH
 
 const nextConfig: NextConfig =
 {
+  assetPrefix: basePath,
   basePath: basePath,
   images: { unoptimized: true },
   output: 'export',
