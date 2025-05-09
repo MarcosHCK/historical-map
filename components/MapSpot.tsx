@@ -23,6 +23,7 @@ import { type SpotContent } from '../lib/MapDescriptor'
 import { type SpotContentOptions } from '../lib/MapDescriptor'
 import { type Text as TextType, type TextImport } from '../lib/MapDescriptor'
 import { type UseTextReturn, useText } from '../hooks/useText'
+import { useHRef } from '../hooks/useHRef'
 import css from './MapSpot.module.css'
 
 function aov2a<T> (aov: T | T[])
@@ -58,7 +59,8 @@ function Paragraph ({ children, import: import_ }: { children: (c: UseTextReturn
 {
   const r = ! (import_ instanceof Object)
   const type = useMemo (() => r ? 'plain' : (import_ as TextType).type, [r, import_])
-  const text = useText (r ? undefined : (import_ as TextType).src, type)
+  const href = useHRef (r ? undefined : (import_ as TextType).src)
+  const text = useText (r ? undefined : href, type)
   return <>{ children ((! r ? text : import_) as string, type) }</>
 }
 

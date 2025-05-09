@@ -54,7 +54,11 @@ export function PopoverMapSpot ({ children, spot }: { children?: React.ReactNode
                       style={{ ['--spot-popover-height']: rem (spot.options.popoverHeight),
                                ['--spot-popover-width']: rem (spot.options.popoverWidth) }} >
 
-      <ScrollArea.Autosize className={css.mapSpotPopoverScrollArea} scrollbarSize={5} overscrollBehavior='none' type='hover'>
+      <ScrollArea.Autosize className={css.mapSpotPopoverScrollArea}
+                           mah={spot.options.popoverHeight} maw={spot.options.popoverWidth}
+                           scrollbarSize={5}
+                           overscrollBehavior='none'
+                           type='hover' >
         { children }
       </ScrollArea.Autosize>
     </Popover.Dropdown>

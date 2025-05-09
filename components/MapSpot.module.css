@@ -35,11 +35,12 @@
 {
   --spot-popover-padding-bottom-top: var(--mantine-spacing-sm);
   --spot-popover-padding-left-right: var(--mantine-spacing-md);
+
   padding: var(--spot-popover-padding-bottom-top)
            var(--spot-popover-padding-left-right);
 }
 
 .mapSpotPopoverScrollArea
 {
-  height: calc(var(--spot-popover-height)- var(--spot-popover-padding-bottom-top) *2);
+  height: calc(var(--spot-popover-height) - var(--spot-popover-padding-bottom-top) * 2);
 }
