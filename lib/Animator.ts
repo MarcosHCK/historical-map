@@ -16,9 +16,9 @@
  */
 import { Hooks } from './Hooks'
 import { type Rectangle } from 'two.js/src/shapes/rectangle'
-import { type Shape } from 'two.js/src/shape'
 import { type Walk } from './Walk'
 import Two from 'two.js'
+import { Sprite } from 'two.js/src/effects/sprite'
 
 export type AnimationState = 'pause' | 'play'
 
@@ -26,8 +26,8 @@ export class Animator
 {
   private _background: Rectangle
   private _canvas: HTMLCanvasElement
-  private _cursor: Shape
-  private _lastPoint: number = -1
+  private _cursor: Sprite
+  private _lastPoint: number = 0
   private _onSpot = new Hooks<[string], void> ()
   private _step: number = 0
   private _two: Two
@@ -41,39 +41,49 @@ export class Animator
 
   public set background (img: HTMLImageElement)
     {
-      this._two.height = (this._canvas.height = img.height)
-      this._two.width = (this._canvas.width = img.width)
-      this._two.renderer.setSize (img.width, img.height)
 
-      this._background.fill = this._two.makeTexture (img)
-      this._background.noStroke ()
-      this._background.translation.set (img.width / 2, img.height / 2)
-      this._background.height = img.height
-      this._background.width = img.width
-      this._background.scale = 1
-      this._background.opacity = 1;
-      (this._cursor as Rectangle).height = this._cursorSize;
-      (this._cursor as Rectangle).width = this._cursorSize
+      const tex = this._two.makeTexture (img, () =>
+        {
+
+          this._two.height = (this._canvas.height = img.height)
+          this._two.width = (this._canvas.width = img.width)
+          this._two.renderer.setSize (img.width, img.height)
+
+          this._background.noStroke ()
+          this._background.translation.set (img.width / 2, img.height / 2)
+          this._background.height = img.height
+          this._background.width = img.width
+          this._background.scale = 1
+          this._background.opacity = 1;
+
+          this._cursor.height = this._cursorSize
+          this._cursor.width = this._cursorSize
+          this._two.update ()
+        })
+
+      this._background.fill = tex
     }
 
   public set cursor (img: HTMLImageElement)
     {
-      let rect: Rectangle
+
       const size = this._cursorSize
-      const texture = this._two.makeTexture (img)
+      const texture = this._two.makeTexture (img, () =>
+        {
+          this._cursor.noStroke ()
+          this._cursor.opacity = 1
+          this._cursor.height = img.height
+          this._cursor.scale = new Two.Vector (size / img.width, size / img.height)
+          this._cursor.width = img.width
+          this._two.update ()
+        })
 
-      this._cursor.remove ()
-      this._cursor = (rect = this._two.makeSprite (texture, 0, 0))
-
-      rect.noStroke ()
-      rect.opacity = 1
-      rect.scale = new Two.Vector (size / img.width, size / img.height)
+      this._cursor.texture = texture
     }
 
   public set walk (walk: Walk)
     {
       this._walk = walk
-      this._renderAt (0)
     }
 
   public set step (step: number)
@@ -91,15 +101,10 @@ export class Animator
   constructor (canvas: HTMLCanvasElement)
     {
       let two: Two
-      let cursor: Rectangle
       this._two = (two = new Two ({ autostart: false, domElement: canvas, type: Two.Types.canvas }))
       this._background = two.makeRectangle (0, 0, two.width, two.height)
       this._canvas = canvas
-
-      const size = this._cursorSize
-      this._cursor = (cursor = two.makeRectangle (0, 0, size, size))
-
-      cursor.fill = '#ff8000'
+      this._cursor = two.makeSprite (undefined, 0, 0)
 
       two.bind ('update', () => this._render ())
     }
@@ -109,6 +114,8 @@ export class Animator
       this._two.pause ()
       this._two.clear ()
     }
+
+  clear () { this._two.clear () }
 
   public onSpot = { connect: (callback: (code: string) => void) => this._onSpot.add (callback),
                     disconnect: (id: number) => this._onSpot.del (id) }

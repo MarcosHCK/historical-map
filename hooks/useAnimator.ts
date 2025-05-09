@@ -59,10 +59,10 @@ export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
 
   useEffect (() => { let animator: Animator | null; if (map && (animator = animatorRef.current))
     {
+      animator.reset ()
       animator.background = map.texture
       animator.cursor = map.cursor
       animator.walk = map.walk
-      animator.update ()
       animator.reset ()
     }}, [map])
 
