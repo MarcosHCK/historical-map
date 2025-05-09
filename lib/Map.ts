@@ -51,8 +51,15 @@ class MapClass
         }, { })
 
       if ((spots = desc.spots) !== undefined) for (let i = 0; i < spots.length; ++i)
-        { const { actions, code, options } = spots[i]
-          this._spots.set (code, new Spot (actions, options, ats[code])) }
+        {
+          let at: undefined | Point
+          const { actions, code, options } = spots[i]
+
+          if ((at = ats[code]) === undefined)
+            throw Error (`Unknown descriptor with code '${code}'`)
+
+          this._spots.set (code, new Spot (actions, options, at))
+        }
     }
 }
 
