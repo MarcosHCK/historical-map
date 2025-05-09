@@ -1,2 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[332],{3757:(e,n,s)=>{"use strict";s.r(n),s.d(n,{IndexPage:()=>r,default:()=>i});var t=s(7876),_=s(4188),u=s(5050);let r=()=>(0,t.jsx)(_.Y,{mt:50,justify:"center",children:(0,t.jsx)(u.E,{children:"Just testing"})}),i=r},6760:(e,n,s)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/",function(){return s(3757)}])}},e=>{var n=n=>e(e.s=n);e.O(0,[636,593,792],()=>n(6760)),_N_E=e.O()}]);
-//# sourceMappingURL=index-889f28d044eb87ee.js.map
