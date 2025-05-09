@@ -26,6 +26,10 @@ const nextConfig: NextConfig =
   output: 'export',
   reactStrictMode: true,
   trailingSlash: true,
+
+  // TODO: remove after debug weird github pages error
+  productionBrowserSourceMaps: true, // enable source maps
+  swcMinify: false, // disable minification to reveal exact error location
 };
 
 export default nextConfig
