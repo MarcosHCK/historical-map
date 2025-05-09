@@ -15,10 +15,10 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Popover, rem, ScrollArea } from '@mantine/core'
+import { SpotPointer } from './SpotPointer'
 import { type Spot } from '../lib/Spot'
 import { useEffect, useState } from 'react'
 import { useHover } from '@mantine/hooks'
-import { usePointerContent } from '../hooks/usePointerContent'
 import css from './MapSpot.module.css'
 
 function useEaseOutValue (value: boolean, wait: number)
@@ -39,15 +39,12 @@ export function PopoverMapSpot ({ children, spot }: { children?: React.ReactNode
   const { ref: dropDownRef, hovered: hovered1 } = useHover ()
   const { ref: pointerRef, hovered: hovered2 } = useHover ()
   const radius = spot.options.pointerRadius ?? 13
-  const pointerStyle = usePointerContent (spot.options.pointerContent)
-  const [ height, width ] = [ radius, radius ]
-  const [ left, top ] = spot.position.map (e => e - radius / 2)
 
   return <Popover opened={useEaseOutValue (hovered1 || hovered2, 200)}>
 
     <Popover.Target>
 
-      <div className={css.mapSpotPointer} ref={pointerRef} style={{ ...pointerStyle, height, left, top, width }} />
+      <SpotPointer at={spot.position} radius={radius} ref={pointerRef} type='color' value='black' {...spot.options.pointerContent} />
     </Popover.Target>
 
     <Popover.Dropdown className={css.mapSpotPopoverDropdown}
