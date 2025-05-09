@@ -1,5 +1,17 @@
 {
-  "scale": 0.0001,
+  "scale": 0.001,
+  "spots":
+    [
+      { "actions": [], "code": "#111111", "options": { "type": "popover", "value": { "pointerContent": { "type": "color", "value": "black" },
+        "content": [ { "type": "html", "value": { "src": "/maps/marti1895/playitas.html", "type": "html" } } ],
+        "popoverHeight": 330, "popoverWidth": 700 }}},
+      { "actions": [], "code": "#222222", "options": { "type": "popover", "value": { "pointerContent": { "type": "color", "value": "black" },
+        "content": [ { "type": "html", "value": { "src": "/maps/marti1895/mejorana.html", "type": "html" } } ],
+        "popoverHeight": 330, "popoverWidth": 700 }}},
+      { "actions": [], "code": "#333333", "options": { "type": "popover", "value": { "pointerContent": { "type": "color", "value": "black" },
+        "content": [ { "type": "html", "value": { "src": "/maps/marti1895/dosrios.html", "type": "html" } } ],
+        "popoverHeight": 330, "popoverWidth": 700 }}}
+    ],
   "textureFile": "/maps/marti1895/map.png",
   "version": "1.0",
   "walkFile": "/maps/marti1895/map.svg"
