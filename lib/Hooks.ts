@@ -36,6 +36,11 @@ export class Hooks<Args extends unknown[], R = never>
         fn (...args)
     }
 
+  public clear ()
+    {
+      this._callbacks = []
+    }
+
   public del (id: number)
     {
       this._callbacks[id] = null

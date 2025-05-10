@@ -44,33 +44,22 @@ export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
 {
   const { map, onSpot, pace = 1 } = args
   const animatorRef = useRef<Animator> (null)
+  const callbackRef = useRef<(c: string) => void> (null)
   const canvasRef = useRef<HTMLCanvasElement> (null)
   const [ state, setState ] = useState<AnimationState> ('pause')
 
-  useEffect (() =>
+  useEffect (() => { if (map)
     {
       const canvas = canvasRef.current!
-      const animator = new Animator (canvas)
+      const animator = new Animator (canvas, map)
 
-      animatorRef.current = animator
-
-      return () => animator.cleanup ()
-    }, [])
-
-  useEffect (() => { let animator: Animator | null; if (map && (animator = animatorRef.current))
-    {
+      animator.onSpot.connect (c => (callbackRef.current ?? (() => {})) (c))
       animator.reset ()
-      animator.background = map.texture
-      animator.cursor = map.cursor
-      animator.walk = map.walk
-      animator.reset ()
+
+      return (animatorRef.current = animator, () => animator.cleanup ())
     }}, [map])
 
-  useEffect (() => { if (onSpot)
-    { const watcher = animatorRef.current?.onSpot?.connect (onSpot);
-      return ! watcher ? undefined : () =>
-                      animatorRef.current?.onSpot?.disconnect (watcher) }}
-    , [onSpot])
+  useEffect (() => { callbackRef.current = onSpot ?? null }, [onSpot])
 
   useEffect (() =>
     {
