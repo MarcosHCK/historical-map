@@ -20,15 +20,20 @@ import { useEffect } from 'react'
 import { useNotification } from './useNotification'
 import input, { type MapsIndex } from '../lib/MapsIndex'
 
-export const useMapsIndex = (url: string) =>
+export function queryKey (url?: string)
+{
+  return [ 'maps', 'index', url ]
+}
+
+export const useMapsIndex = (url?: string) =>
 {
   const notify = useNotification ()
 
   const { data: index, error } = useQuery (
-    {
+    { enabled: !! url,
       placeholderData: keepPreviousData,
-      queryFn: async () => input.fetch<MapsIndex> (url),
-      queryKey: [ 'maps', 'index', url ],
+      queryFn: async () => input.fetch<MapsIndex> (url!),
+      queryKey: queryKey (url),
     })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])

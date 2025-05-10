@@ -41,8 +41,12 @@ function textUrl (blob: Blob, type: TextFormat)
 }
 
 export type TextFormat = 'html' | 'plain'
-
 export type UseTextReturn = string | undefined
+
+export function queryKey (url: string | undefined, type: TextFormat)
+{
+  return [ 'text', 'blob', url, type ]
+}
 
 export function useText (url?: string, type: TextFormat = 'plain')
 {
@@ -69,7 +73,7 @@ export function useText (url?: string, type: TextFormat = 'plain')
                 default: throw Error (`Unknown text format '${type}'`)
               }
         },
-      queryKey: [ 'text', 'blob', url, type ] })
+      queryKey: queryKey (url, type) })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])
 return data

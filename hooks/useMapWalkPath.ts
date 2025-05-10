@@ -96,6 +96,11 @@ function collectCircles (nodes: NodeListOf<SVGCircleElement>)
 return circles
 }
 
+export function queryKey (url?: string)
+{
+  return [ 'map', 'walk', url ]
+}
+
 export const useMapWalkPath = (url?: string) =>
 {
   const notify = useNotification ()
@@ -115,7 +120,7 @@ export const useMapWalkPath = (url?: string) =>
           else
             throw Error (`'${url}' fetch error: ${code}`, { cause: 'fetch' })
         },
-      queryKey: [ 'map', 'walk', url ],
+      queryKey: queryKey (url),
     })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])

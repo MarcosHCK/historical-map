@@ -35,10 +35,12 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
 {
   const [ velocity, setVelocity ] = useState (100)
   const [ canvasRef, { pause, play, reset, state } ] = useAnimator ({ map, onSpot, pace: velocity / 100 })
-  const { ref: hoverRef, hovered: hoverBar } = useHover ()
+  const { ref: hover1Ref, hovered: hover1Bar } = useHover ()
+  const { ref: hover2Ref, hovered: hover2Bar } = useHover ()
+  const hoverBar = hover1Bar || hover2Bar
   const viewportRef = useRef<HTMLDivElement> (null)
-  const { active, ref: moveRef } = useDrag (({ x, y }) => viewportRef.current?.scrollBy (x * hoverRef.current!.clientWidth / 2,
-                                                                                         y * hoverRef.current!.clientHeight / 2))
+  const { active, ref: moveRef } = useDrag (({ x, y }) => viewportRef.current?.scrollBy (x * viewportRef.current!.clientWidth / 2,
+                                                                                         y * viewportRef.current!.clientHeight / 2))
 
   const resetAnimation = useCallback (() => { if (!! map)
     {
@@ -59,16 +61,15 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
   return <Stack pos='relative'>
 
     { ! map &&
-      <Overlay backgroundOpacity={0} zIndex={1}> <MapSkeleton />
+      <Overlay backgroundOpacity={0}> <MapSkeleton />
       </Overlay> }
 
     <Center> <Stack className={css.canvasContainer}>
 
       <ScrollArea h='var(--app-shell-main-col-height)'
-                           offsetScrollbars='present'
-                           type='never'
-                           viewportRef={viewportRef}
-                           w='100%' >
+                  type='never'
+                  viewportRef={viewportRef}
+                  w='100%' >
 
         <Stack pos='relative'>
           <canvas ref={canvasRef} />
@@ -76,38 +77,37 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
         </Stack>
       </ScrollArea>
 
-      <Overlay backgroundOpacity={0} ref={useMergedRef (hoverRef, moveRef)} zIndex={1}
+      <Overlay backgroundOpacity={0} className={css.canvasOverlay} ref={useMergedRef (hover1Ref, moveRef)}
         style={{ cursor: ! active ? 'grab' : 'grabbing' }}>
-
-        <Transition mounted={hoverBar && !! map}>
-
-          { style =>
-          <Group className={css.controlsGroup} gap={7} justify='start' style={style}>
-
-            <Button color='white' onClick={resetAnimation} variant='transparent'>
-              <PiStopFill />
-            </Button>
-
-            <Button color='white' onClick={toggleAnimation} variant='transparent'>
-              { state === 'play' ? <PiPauseFill /> : <PiPlayFill /> }
-            </Button>
-
-            <Popover position='top-start' withinPortal={false}>
-
-              <Popover.Target>
-
-                <Button color='white' variant='transparent'> <PiFastForwardFill /> </Button>
-              </Popover.Target>
-
-              <Popover.Dropdown w={300}>
-
-                <Slider color='blue' marks={[ 25, 50, 75, 100, 125, 150, 175, 200 ].map (e => ({ value: e }))}
-                  min={1} max={200} onChange={setVelocity} restrictToMarks value={velocity} />
-              </Popover.Dropdown>
-            </Popover>
-          </Group> }
-        </Transition>
       </Overlay>
+
+      <Transition keepMounted={true} mounted={!! map && hoverBar}>{ style =>
+
+        <Group className={css.controlsContainer} gap={7} justify='start' ref={hover2Ref} style={style}>
+
+          <Button color='white' onClick={resetAnimation} variant='transparent'>
+            <PiStopFill />
+          </Button>
+
+          <Button color='white' onClick={toggleAnimation} variant='transparent'>
+            { state === 'play' ? <PiPauseFill /> : <PiPlayFill /> }
+          </Button>
+
+          <Popover position='top-start' withinPortal={false}>
+
+            <Popover.Target>
+
+              <Button color='white' variant='transparent'> <PiFastForwardFill /> </Button>
+            </Popover.Target>
+
+            <Popover.Dropdown w={300}>
+
+              <Slider color='blue' marks={[ 25, 50, 75, 100, 125, 150, 175, 200 ].map (e => ({ value: e }))}
+                min={1} max={200} onChange={setVelocity} restrictToMarks value={velocity} />
+            </Popover.Dropdown>
+          </Popover>
+        </Group> }
+      </Transition>
     </Stack> </Center>
   </Stack>
 }

@@ -40,7 +40,7 @@ export function PopoverMapSpot ({ children, spot }: { children?: React.ReactNode
   const { ref: pointerRef, hovered: hovered2 } = useHover ()
   const radius = spot.options.pointerRadius ?? 13
 
-  return <Popover opened={useEaseOutValue (hovered1 || hovered2, 200)}>
+  return <Popover keepMounted={true} opened={useEaseOutValue (hovered1 || hovered2, 200)}>
 
     <Popover.Target>
 

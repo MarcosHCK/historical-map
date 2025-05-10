@@ -38,6 +38,11 @@ const fetchOptions: RequestInit =
 
 export type Image = HTMLImageElement
 
+export function queryKey (url: string | undefined, mimeTypes: string[])
+{
+  return [ 'image', 'blob', url, mimeTypes ]
+}
+
 export function useImage (url?: string, mimeTypes = [ 'image/png', 'image/svg+xml' ])
 {
   const notify = useNotification ()
@@ -56,7 +61,7 @@ export function useImage (url?: string, mimeTypes = [ 'image/png', 'image/svg+xm
           else
             throw Error (`'${url}' fetch error: ${response.status}`, { cause: 'fetch' })
         },
-      queryKey: [ 'image', 'blob', url, mimeTypes ] })
+      queryKey: queryKey (url, mimeTypes) })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])
 

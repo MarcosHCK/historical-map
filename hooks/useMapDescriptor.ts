@@ -20,15 +20,20 @@ import { useEffect } from 'react'
 import { useNotification } from './useNotification'
 import input, { type MapDescriptor } from '../lib/MapDescriptor'
 
-export const useMapDescriptor = (url: string) =>
+export function queryKey (url?: string)
+{
+  return [ 'map', 'descriptor', url ]
+}
+
+export const useMapDescriptor = (url?: string) =>
 {
   const notify = useNotification ()
 
   const { data: index, error } = useQuery (
-    {
+    { enabled: !! url,
       placeholderData: keepPreviousData,
-      queryFn: async () => input.fetch<MapDescriptor> (url),
-      queryKey: [ 'map', 'descriptor', url ],
+      queryFn: async () => input.fetch<MapDescriptor> (url!),
+      queryKey: queryKey (url),
     })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])
