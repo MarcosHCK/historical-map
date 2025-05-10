@@ -81,7 +81,7 @@ export const App = ({ Component, pageProps }: any) =>
 
           <Grid columns={columns} gutter={0}>
 
-            <Grid.Col offset={spaceSizes} span={centerSizes}> <Component {...pageProps} /> </Grid.Col>
+            <Grid.Col className={css.appShellMainCol} offset={spaceSizes} span={centerSizes}> <Component {...pageProps} /> </Grid.Col>
           </Grid>
         </AppShell.Main>
 

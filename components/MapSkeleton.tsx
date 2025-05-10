@@ -14,17 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import { useTimeout } from '@mantine/hooks'
-import { useState } from 'react'
+import { Stack, Group, Skeleton } from '@mantine/core'
 
-export type UseTriggerReturn<T> =
-[
-  T, () => void,
-]
-
-export function useTrigger<T = boolean> (lowValue: T, highValue: T, delay: number): UseTriggerReturn<T>
+export function MapSkeleton ()
 {
-  const [ value, setValue ] = useState<T> (lowValue)
-  const { start } = useTimeout (() => setValue (lowValue), delay)
-return [ value, () => { setValue (highValue); start () } ]
+  return <Stack gap={6}>
+
+    <Group justify='space-between'>
+
+      <Skeleton height={50} circle mb='lg' />
+      <Stack>
+        <Skeleton height={50} />
+        <Skeleton height={50} width='70%' />
+      </Stack>
+    </Group>
+
+    <Skeleton height={8} radius='xl' />
+    <Skeleton height={8} radius='xl' />
+    <Skeleton height={8} radius='xl' width='70%' />
+    <Skeleton height={8} radius='xl' />
+    <Skeleton height={8} radius='xl' />
+    <Skeleton height={8} radius='xl' width='95%' />
+    <Skeleton height={8} radius='xl' />
+    <Skeleton height={8} radius='xl' />
+    <Skeleton height={8} radius='xl' width='60%' />
+  </Stack>
 }

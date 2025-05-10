@@ -14,39 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+import { type RefObject, useEffect, useState } from 'react'
+import { useMove } from '@mantine/hooks'
 
-.canvasCenter
+export interface UseDragDelta
 {
-  left: 0;
-  min-height: 100%;
-  min-width: 100%;
-  position: absolute;
-  top: 0;
-  z-index: 2;
+  x: number,
+  y: number,
 }
 
-.canvasContainer
+export interface UseDragResult<T>
 {
-  max-height: 100%;
-  max-width: 100%;
-  position: relative;
+  active: boolean,
+  ref: RefObject<T>,
 }
 
-.controlsButton
+function offset (now: UseDragDelta, last: UseDragDelta)
 {
-  &[data-loading]::before
-    {
-      opacity: 0 !important;
-    }
+  return { x: last.x - now.x, y: last.y - now.y }
 }
 
-.controlsGroup
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useDrag<T = any> (onDrag: (value: UseDragDelta) => void): UseDragResult<T>
 {
-  background-color: var(--mantine-color-gray-9);
-  bottom: 0;
-  left: 0;
-  min-width: 100%;
-  opacity: 0.70;
-  position: absolute;
-  z-index: 3;
+  const [ , setFrom ] = useState<UseDragDelta> ()
+  const { active, ref } = useMove (now => setFrom (last => ! last ? now : (onDrag (offset (now, last)), now)))
+
+  useEffect (() => setFrom (undefined), [active])
+return { active, ref }
 }

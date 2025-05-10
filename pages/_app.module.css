@@ -32,3 +32,12 @@
   padding-left: var(--app-shell-main-left-padding);
   padding-right: var(--app-shell-main-right-padding);
 }
+
+.appShellMainCol
+{
+  --app-shell-main-col-top-padding: calc(var(--app-shell-header-offset, 0rem) + var(--app-shell-padding));
+  --app-shell-main-col-bottom-padding: calc(var(--app-shell-footer-offset, 0rem) + var(--app-shell-padding));
+  --app-shell-main-col-height: calc(100vh - var(--app-shell-main-col-top-padding) - var(--app-shell-main-col-bottom-padding));
+
+  min-height: var(--app-shell-main-col-height);
+}
