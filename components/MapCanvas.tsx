@@ -19,44 +19,49 @@ import { mapMap } from '../lib/Array'
 import { MapSkeleton } from './MapSkeleton'
 import { MapSpot } from './MapSpot'
 import { PiFastForwardFill, PiPauseFill, PiPlayFill, PiStopFill } from 'react-icons/pi'
+import { scrollToCentered } from '../lib/scrollTo'
+import { type ActionDescriptor, type FocusAction } from '../lib/MapDescriptor'
 import { type Map } from '../lib/Map'
+import { type Spot } from '../lib/Spot'
 import { useAnimator } from '../hooks/useAnimator'
 import { useCallback, useRef, useState } from 'react'
-import { useDrag } from '../hooks/useDrag'
+import { useDragScrolling } from '../hooks/useDragScroll'
 import { useHover, useMergedRef } from '@mantine/hooks'
 import css from './MapCanvas.module.css'
-
-function onSpot (code: string)
-{
-  console.log (`hit ${code}`)
-}
 
 export const MapCanvas = ({ map }: { map?: Map }) =>
 {
   const [ velocity, setVelocity ] = useState (100)
-  const [ canvasRef, { pause, play, reset, state } ] = useAnimator ({ map, onSpot, pace: velocity / 100 })
   const { ref: hover1Ref, hovered: hover1Bar } = useHover ()
   const { ref: hover2Ref, hovered: hover2Bar } = useHover ()
   const hoverBar = hover1Bar || hover2Bar
-  const viewportRef = useRef<HTMLDivElement> (null)
-  const { active, ref: moveRef } = useDrag (({ x, y }) => viewportRef.current?.scrollBy (x * viewportRef.current!.clientWidth / 2,
-                                                                                         y * viewportRef.current!.clientHeight / 2))
+  const cancelFocusRef = useRef<() => void> (() => {})
+  const { active, moveRef, viewportRef } = useDragScrolling ({ onDrag: () => cancelFocusRef.current () })
 
-  const resetAnimation = useCallback (() => { if (!! map)
+  const onSpot = useCallback ((code: string) =>
     {
-      pause ()
-      reset ()
-    }}, [map, pause, reset])
+      let spot: Spot | undefined
+      if (undefined === (spot = (map?.spots.get (code))))
+        throw Error (`Unknown spot code '${code}'`)
 
-  const toggleAnimation = useCallback (() => { if (!! map)
-    {
+      const { actions, position: at } = spot
 
-      switch (state)
+      let action: ActionDescriptor
+      for (let i = 0; i < actions.length; ++i) switch ((action = actions[i]).type)
         {
-          case 'pause': play (); break;
-          case 'play': pause (); break;
+          case 'focus': { const desc = action.value as FocusAction | undefined
+                          const { behavior = 'linear', duration = 300 } = desc ?? { }
+                          const position = { x: at[0], y: at[1] }
+                          cancelFocusRef.current = scrollToCentered (viewportRef.current!, { behavior, position, duration })
+                          break; }
+          default: throw Error (`Unknown spot action '${action.type}'`)
         }
-    }}, [map, state, pause, play])
+    }, [map, viewportRef])
+
+  const [ canvasRef, { pause, reset, state, toggle } ] = useAnimator ({ map, onSpot, pace: velocity / 100 })
+
+  const resetAnimation = useCallback (() => { if (!! map) { pause (); reset () }}, [map, pause, reset])
+  const toggleAnimation = useCallback (() => { if (!! map) { toggle () }}, [map, toggle])
 
   return <Stack pos='relative'>
 

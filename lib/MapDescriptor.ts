@@ -21,7 +21,14 @@ export default input
 
 export interface ActionDescriptor
 {
-  name: string,
+  type: 'focus',
+  value?: FocusAction,
+}
+
+export interface FocusAction
+{
+  behavior: 'ease-in-out' | 'linear',
+  duration: number,
 }
 
 export interface Image

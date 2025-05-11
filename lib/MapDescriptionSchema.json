@@ -4,11 +4,29 @@
       "ActionDescriptor":
         {
           "additionalProperties": false,
+          "allOf":
+            [
+              {
+                "if": { "properties": { "type": { "const": "focus" } } },
+                "then": { "properties": { "value": { "$ref": "#/$defs/FocusAction" } } }
+              }
+            ],
           "properties":
             {
-              "name": { "type": "string" }
+              "type": { "enum": [ "focus" ], "type": "string" },
+              "value": { }
             },
-          "required": [ "name" ],
+          "required": [ "type" ],
+          "type": "object"
+        },
+      "FocusAction":
+        {
+          "additionalProperties": false,
+          "properties":
+            {
+              "behavior": { "enum": [ "ease-in-out", "linear" ], "type": "string" },
+              "duration": { "minimum": 0, "type": "number" }
+            },
           "type": "object"
         },
       "Image":

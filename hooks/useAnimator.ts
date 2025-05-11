@@ -25,6 +25,7 @@ export interface AnimatorControls
   play: () => void,
   reset: () => void,
   state: AnimationState,
+  toggle: () => void,
 }
 
 export type UseAnimatorResult =
@@ -72,7 +73,10 @@ export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
       case 'play': animatorRef.current?.play (); break;
     }}, [state])
 
+  const pause = useCallback (() => setState ('pause'), [])
+  const play = useCallback (() => setState ('play'), [])
   const reset = useCallback (() => { animatorRef.current?.reset () }, [])
+  const toggle = useCallback (() => setState (l => 'pause' === l ? 'play' : 'pause'), [])
 
-return [ canvasRef, { pause: () => setState ('pause'), play: () => setState ('play'), reset, state } ]
+return [ canvasRef, { pause, play, reset, state, toggle } ]
 }
