@@ -20,17 +20,19 @@ import { MapSkeleton } from './MapSkeleton'
 import { MapSpot } from './MapSpot'
 import { PiFastForwardFill, PiPauseFill, PiPlayFill, PiStopFill } from 'react-icons/pi'
 import { scrollToCentered } from '../lib/scrollTo'
-import { type ActionDescriptor, type FocusAction } from '../lib/MapDescriptor'
+import { type HaltAction, type ActionDescriptor, type FocusAction } from '../lib/MapDescriptor'
 import { type Map } from '../lib/Map'
 import { type Spot } from '../lib/Spot'
 import { useAnimator } from '../hooks/useAnimator'
 import { useCallback, useRef, useState } from 'react'
 import { useDragScrolling } from '../hooks/useDragScroll'
+import { useHaltController } from '../hooks/useHaltController'
 import { useHover, useMergedRef } from '@mantine/hooks'
 import css from './MapCanvas.module.css'
 
 export const MapCanvas = ({ map }: { map?: Map }) =>
 {
+  const { halt, halted } = useHaltController ()
   const [ velocity, setVelocity ] = useState (100)
   const { ref: hover1Ref, hovered: hover1Bar } = useHover ()
   const { ref: hover2Ref, hovered: hover2Bar } = useHover ()
@@ -54,11 +56,15 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
                           const position = { x: at[0], y: at[1] }
                           cancelFocusRef.current = scrollToCentered (viewportRef.current!, { behavior, position, duration })
                           break; }
+          case  'halt': { const desc = action.value as HaltAction | undefined
+                          const { duration = 400 } = desc ?? { }
+                          halt (duration)
+                          break; }
           default: throw Error (`Unknown spot action '${action.type}'`)
         }
-    }, [map, viewportRef])
+    }, [map, halt, viewportRef])
 
-  const [ canvasRef, { pause, reset, state, toggle } ] = useAnimator ({ map, onSpot, pace: velocity / 100 })
+  const [ canvasRef, { pause, reset, state, toggle } ] = useAnimator ({ map, onSpot, pace: (halted ? 0 : 1) * velocity / 100 })
 
   const resetAnimation = useCallback (() => { if (!! map) { pause (); reset () }}, [map, pause, reset])
   const toggleAnimation = useCallback (() => { if (!! map) { toggle () }}, [map, toggle])

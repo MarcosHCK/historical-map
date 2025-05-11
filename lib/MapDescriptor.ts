@@ -21,13 +21,18 @@ export default input
 
 export interface ActionDescriptor
 {
-  type: 'focus',
-  value?: FocusAction,
+  type: 'focus' | 'halt',
+  value?: FocusAction | HaltAction,
 }
 
 export interface FocusAction
 {
   behavior: 'ease-in-out' | 'linear',
+  duration: number,
+}
+
+export interface HaltAction
+{
   duration: number,
 }
 

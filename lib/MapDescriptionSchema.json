@@ -9,11 +9,16 @@
               {
                 "if": { "properties": { "type": { "const": "focus" } } },
                 "then": { "properties": { "value": { "$ref": "#/$defs/FocusAction" } } }
+              },
+              {
+                "if": { "properties": { "type": { "const": "halt" } } },
+                "then": { "properties": { "value": { "$ref": "#/$defs/HaltAction" } },
+                          "required": [ "value" ] }
               }
             ],
           "properties":
             {
-              "type": { "enum": [ "focus" ], "type": "string" },
+              "type": { "enum": [ "focus", "halt" ], "type": "string" },
               "value": { }
             },
           "required": [ "type" ],
@@ -27,6 +32,16 @@
               "behavior": { "enum": [ "ease-in-out", "linear" ], "type": "string" },
               "duration": { "minimum": 0, "type": "number" }
             },
+          "type": "object"
+        },
+      "HaltAction":
+        {
+          "additionalProperties": false,
+          "properties":
+            {
+              "duration": { "minimum": 0, "type": "number" }
+            },
+          "required": [ "duration" ],
           "type": "object"
         },
       "Image":
