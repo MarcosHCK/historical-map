@@ -36,6 +36,17 @@ function actionEnabled (desc: ActionDescriptor, reason: StepReason)
   return desc.enabled === undefined || reason in desc.enabled
 }
 
+function takeProperty<T> (prop: undefined | T | { [P in StepReason]?: T }, reason: StepReason): T | undefined;
+function takeProperty<T> (prop: undefined | T | { [P in StepReason]?: T }, reason: StepReason, default_: T): T;
+function takeProperty<T> (prop: undefined | T | { [P in StepReason]?: T }, reason: StepReason, default_?: T)
+{
+  if (! (prop instanceof Object))
+
+    return prop ?? default_
+  else
+    return prop[reason] ?? default_
+}
+
 export const MapCanvas = ({ map }: { map?: Map }) =>
 {
   const { halt, halted } = useHaltController ()
@@ -58,15 +69,16 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
       for (let i = 0; i < actions.length; ++i) if (actionEnabled (action = actions[i], reason)) switch (action.type)
         {
           case 'focus': { const desc = action.value as FocusAction | undefined
-                          const { behavior = 'linear', duration = 300 } = desc ?? {}
+                          const behavior = takeProperty (desc?.behavior, reason, 'linear')
+                          const duration = takeProperty (desc?.duration, reason, 300)
                           const position = { x: at[0], y: at[1] }
                           cancelFocusRef.current = scrollToCentered (viewportRef.current!, { behavior, position, duration })
                           break; }
           case  'halt': { const desc = action.value as HaltAction | undefined
-                          const { duration = 400 } = desc ?? {}
-                          halt (duration)
+                          const duration = takeProperty (desc?.duration, reason, 400)
+                          if (reason === 'step') halt (duration)
                           break; }
-          default: throw Error (`Unknown spot action '${action.type}'`)
+          default: throw Error (`Unknown spot action '${(action as { type: string }).type}'`)
         }
     }, [map, halt, viewportRef])
 

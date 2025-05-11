@@ -26,11 +26,6 @@ import { type UseTextReturn, useText } from '../hooks/useText'
 import { useHRef } from '../hooks/useHRef'
 import css from './MapSpot.module.css'
 
-function aov2a<T> (aov: T | T[])
-{
-  return Array.isArray (aov) ? aov : [ aov ]
-}
-
 function Inner ({ type, value }: SpotContent)
 {
 
@@ -73,12 +68,11 @@ function Wrapper ({ centered, children }: SpotContentOptions & { children?: Reac
     </Stack>
 }
 
-function Content ({ content }: { content: SpotContent | SpotContent[] })
+function Content ({ content }: { content: SpotContent[] })
 {
 
   return <Stack className={css.mapSpotContent}>
-    { useMemo (() => aov2a (content), [content]).map ((s, i) => <Wrapper {...(s.options ?? { })} key={i}>
-      <Inner {...s} key={i} /> </Wrapper>) }
+    { content.map ((s, i) => <Wrapper {...(s.options ?? { })} key={i}> <Inner {...s} key={i} /> </Wrapper>) }
   </Stack>
 }
 

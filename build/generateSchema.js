@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /* Copyright 2025-2026 MarcosHCK
  * This file is part of Historical-Map.
  *
@@ -14,28 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import schema from './MapsIndexSchema.json'
-import { JsonInput } from './JsonInput'
-export const input = new JsonInput (schema)
-export default input
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { execSync } = require ('child_process')
 
-export interface MapsIndex
+if (process.argv.length < 3)
 {
-  entries: MapsIndexEntry[]
-  version: string
+  console.error ('Error: Type name is required')
+  console.log ('Usage: node myscript.js <TypeName> [...<TypeName>]')
+  process.exit (1)
 }
 
-export type MapsIndexEntry = { type: 'group', value: MapsIndexEntryGroup }
-                           | { type: 'map', value: MapsIndexEntryMap }
+const bin = 'ts-json-schema-generator'
 
-export interface MapsIndexEntryGroup
+try
 {
-  entries: MapsIndexEntry[]
-  title: string
+  for (let i = 2; i < process.argv.length; ++i)
+
+    { const typeName = process.argv[i]
+      const command = `${bin} -p lib/${typeName}.ts -t ${typeName} > lib/${typeName}.json`
+
+      console.log(`Generating schema for ${typeName}...`)
+      execSync (command, { stdio: 'inherit' }) }
 }
-
-export interface MapsIndexEntryMap
+catch (error)
 {
-  metaFile: string
-  title: string
+  console.error(`Error generating schema: ${error.message}`);
+  process.exit (1)
 }

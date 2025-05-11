@@ -14,29 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import schema from './MapDescriptionSchema.json'
+import schema from './MapDescriptor.json'
 import { JsonInput } from './JsonInput'
 export const input = new JsonInput (schema)
 export default input
 
-export interface ActionDescriptor
-{
-  enabled?: [ ActionReason ],
-  type: 'focus' | 'halt',
-  value?: FocusAction | HaltAction,
-}
+export type ActionDescriptor = { enabled?: ActionReason[] }
+                             & ({ type: 'focus', value?: FocusAction }
+                             |  { type: 'halt', value?: HaltAction })
 
+export type ActionProperty<T> = T | { [P in ActionReason]?: T }
 export type ActionReason = 'seek' | 'step'
 
 export interface FocusAction
 {
-  behavior: 'ease-in-out' | 'linear',
-  duration: number,
+  behavior: ActionProperty<'ease-in-out' | 'linear'>,
+  duration: ActionProperty<number>,
 }
 
 export interface HaltAction
 {
-  duration: number,
+  duration: ActionProperty<number>,
 }
 
 export interface Image
@@ -59,30 +57,26 @@ export interface MapDescriptor
   walkFile: string,
 }
 
-export interface PointerContent
-{
-  type: 'color' | 'image',
-  value: PointerContentColor | PointerContentImage,
-}
+export type PointerContent = { type: 'color', value: PointerContentColor }
+                           | { type: 'image', value: PointerContentImage }
 
 export type PointerContentColor = string
 export type PointerContentImage = ImageImport
 
 export interface PopoverSpotOptions
 {
-  content: SpotContent | SpotContent[],
+  content: SpotContent[],
   pointerContent?: PointerContent,
   pointerRadius?: number,
   popoverHeight?: number,
   popoverWidth?: number,
 }
 
-export interface SpotContent
-{
-  options?: SpotContentOptions,
-  type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'hr' | 'html' | 'img' | 'p',
-  value: number | string | ImageImport,
-}
+export type SpotContent = { options?: SpotContentOptions }
+                        & ({ type: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p', value: string }
+                        |  { type: 'hr', value: number }
+                        |  { type: 'html', value: TextImport }
+                        |  { type: 'img', value: ImageImport })
 
 export interface SpotContentOptions
 {
@@ -96,11 +90,7 @@ export interface SpotDescriptor
   options: SpotDescriptorOptions,
 }
 
-export interface SpotDescriptorOptions
-{
-  type: 'popover',
-  value: PopoverSpotOptions,
-}
+export type SpotDescriptorOptions = { type: 'popover', value: PopoverSpotOptions }
 
 export interface Text
 {
