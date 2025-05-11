@@ -18,11 +18,17 @@
             ],
           "properties":
             {
+              "enabled": { "items": { "$ref": "#/$defs/ActionReason" }, "type": "array", "uniqueItems": true },
               "type": { "enum": [ "focus", "halt" ], "type": "string" },
               "value": { }
             },
           "required": [ "type" ],
           "type": "object"
+        },
+      "ActionReason":
+        {
+          "enum": [ "seek", "step" ],
+          "type": "string"
         },
       "FocusAction":
         {

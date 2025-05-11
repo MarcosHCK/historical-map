@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+import { createPolymorphicComponent, type PolymorphicComponentProps, Stack, Text } from '@mantine/core'
+import { forwardRef, type ReactNode, useMemo } from 'react'
 import { ImageImport, ImageImportProps } from './ImageImport'
 import { PopoverMapSpot } from './PopoverMapSpot'
-import { Stack, Text } from '@mantine/core'
-import { type ReactNode, useMemo } from 'react'
 import { type Spot } from '../lib/Spot'
 import { type SpotContent } from '../lib/MapDescriptor'
 import { type SpotContentOptions } from '../lib/MapDescriptor'
@@ -42,7 +42,8 @@ function Inner ({ type, value }: SpotContent)
       case 'h4':
       case 'h5':
       case 'h6':
-      case 'p': return <Text component={type} fz={'p' === type ? 'md' : type}>{ value as string }</Text>
+      case 'p': return <Text component={type} fz={'p' === type ? 'md' : type}>
+        { value as string }</Text>
       case 'hr': return <hr style={{ border: value as number }} />
       case 'html': return <Paragraph import={value as TextImport}>{ (c, t) => { switch (t)
           {
@@ -72,21 +73,31 @@ function Wrapper ({ centered, children }: SpotContentOptions & { children?: Reac
     </Stack>
 }
 
-export function MapSpot ({ spot }: { spot: Spot })
-{
-
-  switch (spot.type)
-    {
-      case 'popover': return <PopoverMapSpot spot={spot}> <MapSpotContent content={spot.options.content} /> </PopoverMapSpot>
-      default: throw Error (`Unknown error ${spot.type}`)
-    }
-}
-
-export function MapSpotContent ({ content }: { content: SpotContent | SpotContent[] })
+function Content ({ content }: { content: SpotContent | SpotContent[] })
 {
 
   return <Stack className={css.mapSpotContent}>
     { useMemo (() => aov2a (content), [content]).map ((s, i) => <Wrapper {...(s.options ?? { })} key={i}>
-      <Inner {...s} /> </Wrapper>) }
+      <Inner {...s} key={i} /> </Wrapper>) }
   </Stack>
 }
+
+export interface MapSpotProps
+{
+  spot: Spot,
+}
+
+type Ct = HTMLDivElement
+type Cp = MapSpotProps
+type Pp = PolymorphicComponentProps<'div', Cp>
+
+// eslint-disable-next-line react/display-name
+export const MapSpot = createPolymorphicComponent<'div', Cp> (forwardRef<Ct, Pp> (({ spot, ...rest }, ref) =>
+{
+
+  switch (spot.type)
+    {
+      case 'popover': return <PopoverMapSpot {...rest} ref={ref} spot={spot}> <Content content={spot.options.content} /> </PopoverMapSpot>
+      default: throw Error (`Unknown error ${spot.type}`)
+    }
+}))

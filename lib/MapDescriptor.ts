@@ -21,9 +21,12 @@ export default input
 
 export interface ActionDescriptor
 {
+  enabled?: [ ActionReason ],
   type: 'focus' | 'halt',
   value?: FocusAction | HaltAction,
 }
+
+export type ActionReason = 'seek' | 'step'
 
 export interface FocusAction
 {

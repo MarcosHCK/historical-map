@@ -20,13 +20,18 @@ import { Sprite } from 'two.js/src/effects/sprite'
 import { type Walk } from './Walk'
 import Two from 'two.js'
 
+type OnSpotArgs = [string, StepReason]
+
 export type AnimationState = 'pause' | 'play'
+export type StepReason = 'seek' | 'step'
+export type Whence = 'cur' | 'end' | 'set'
 
 export class Animator
 {
   private _cursor: Sprite
   private _lastPoint: number = 0
-  private _onSpot = new Hooks<[string], void> ()
+  private _onSpot = new Hooks<OnSpotArgs, void> ()
+  private _seeking: boolean = false
   private _step: number = 0
   private _two: Two
   private _walk: Walk | undefined = undefined
@@ -52,7 +57,7 @@ export class Animator
   cleanup () { this._two.pause (); this._two.clear (); this._onSpot.clear () }
   clear () { this._two.clear () }
 
-  onSpot = { connect: (callback: (code: string) => void) => this._onSpot.add (callback),
+  onSpot = { connect: (callback: (...args: OnSpotArgs) => void) => this._onSpot.add (callback),
              disconnect: (id: number) => this._onSpot.del (id) }
 
   pause () { this._two.pause () }
@@ -65,6 +70,21 @@ export class Animator
       this._two.update ()
     }
 
+  seek (at: number, whence: Whence): number { switch (whence)
+    {
+      case 'cur': return this.seek (at + this._walked, 'set')
+      case 'end': return this.seek (at + this._totalLength, 'set')
+      case 'set': if (at < 0)
+                    throw Error ('Can not seek before path start')
+                  else if (at > this._totalLength)
+                    throw Error ('Can not seek past the end of the path')
+              this._seeking = true
+              this._walked = (this._lastPoint = at)
+              this._two.update ()
+              return (this._seeking = false, at)
+      default: throw Error (`Unknown whence type '${whence}'`)
+    }}
+
   update () { this._two.update () }
 
   private _render ()
@@ -75,13 +95,13 @@ export class Animator
       const at = this._walked
       const next = at + this._step * (length = this._totalLength)
 
-      let spot: string | null
-      if ((spot = this._walk.getSpotAtInterval (this._lastPoint, at)) != null)
-        { this._onSpot.call (spot); }
+      let code: string | null
+      if ((code = this._walk.getSpotAtInterval (this._lastPoint, at)) != null)
+        this._onSpot.call (code, this._seeking ? 'seek' : 'step')
 
       this._renderAt (at)
-      this._lastPoint = next > length ? -1 : at
-      this._walked = next > length ? 0 : next
+      this._lastPoint = next > length ? length : at
+      this._walked = next > length ? length : next
     }
 
   private _renderAt (at: number)

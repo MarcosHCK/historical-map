@@ -23,12 +23,18 @@ import { scrollToCentered } from '../lib/scrollTo'
 import { type HaltAction, type ActionDescriptor, type FocusAction } from '../lib/MapDescriptor'
 import { type Map } from '../lib/Map'
 import { type Spot } from '../lib/Spot'
+import { type StepReason } from '../lib/Animator'
 import { useAnimator } from '../hooks/useAnimator'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useDragScrolling } from '../hooks/useDragScroll'
 import { useHaltController } from '../hooks/useHaltController'
 import { useHover, useMergedRef } from '@mantine/hooks'
 import css from './MapCanvas.module.css'
+
+function actionEnabled (desc: ActionDescriptor, reason: StepReason)
+{
+  return desc.enabled === undefined || reason in desc.enabled
+}
 
 export const MapCanvas = ({ map }: { map?: Map }) =>
 {
@@ -40,7 +46,7 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
   const cancelFocusRef = useRef<() => void> (() => {})
   const { active, moveRef, viewportRef } = useDragScrolling ({ onDrag: () => cancelFocusRef.current () })
 
-  const onSpot = useCallback ((code: string) =>
+  const onSpot = useCallback ((code: string, reason: StepReason) =>
     {
       let spot: Spot | undefined
       if (undefined === (spot = (map?.spots.get (code))))
@@ -49,42 +55,39 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
       const { actions, position: at } = spot
 
       let action: ActionDescriptor
-      for (let i = 0; i < actions.length; ++i) switch ((action = actions[i]).type)
+      for (let i = 0; i < actions.length; ++i) if (actionEnabled (action = actions[i], reason)) switch (action.type)
         {
           case 'focus': { const desc = action.value as FocusAction | undefined
-                          const { behavior = 'linear', duration = 300 } = desc ?? { }
+                          const { behavior = 'linear', duration = 300 } = desc ?? {}
                           const position = { x: at[0], y: at[1] }
                           cancelFocusRef.current = scrollToCentered (viewportRef.current!, { behavior, position, duration })
                           break; }
           case  'halt': { const desc = action.value as HaltAction | undefined
-                          const { duration = 400 } = desc ?? { }
+                          const { duration = 400 } = desc ?? {}
                           halt (duration)
                           break; }
           default: throw Error (`Unknown spot action '${action.type}'`)
         }
     }, [map, halt, viewportRef])
 
-  const [ canvasRef, { pause, reset, state, toggle } ] = useAnimator ({ map, onSpot, pace: (halted ? 0 : 1) * velocity / 100 })
+  const [ canvasRef, { pause, reset, seek, state, toggle } ] = useAnimator ({ map, onSpot, pace: (halted ? 0 : 1) * velocity / 100 })
+  const lengths = useMemo (() => map?.walk?.spots?.reduce ((a, { at, code }) => (a.set (code, at), a), new globalThis.Map<string, number> ()), [map])
 
   const resetAnimation = useCallback (() => { if (!! map) { pause (); reset () }}, [map, pause, reset])
   const toggleAnimation = useCallback (() => { if (!! map) { toggle () }}, [map, toggle])
 
   return <Stack pos='relative'>
 
-    { ! map &&
-      <Overlay backgroundOpacity={0}> <MapSkeleton />
-      </Overlay> }
+    { ! map && <Overlay backgroundOpacity={0}> <MapSkeleton /> </Overlay> }
 
     <Center> <Stack className={css.canvasContainer}>
 
-      <ScrollArea h='var(--app-shell-main-col-height)'
-                  type='never'
-                  viewportRef={viewportRef}
-                  w='100%' >
+      <ScrollArea h='var(--app-shell-main-col-height)' type='never' viewportRef={viewportRef} w='100%' >
 
         <Stack pos='relative'>
           <canvas ref={canvasRef} />
-          { map && mapMap (map.spots, (spot, i) => <MapSpot key={i} spot={spot} />) }
+          { map && mapMap (map.spots, (spot, i, code) => <MapSpot component='button' key={i} spot={spot}
+            onClick={() => { let at: number | undefined; if ((at = lengths?.get (code))) seek (at, 'set') }} />) }
         </Stack>
       </ScrollArea>
 

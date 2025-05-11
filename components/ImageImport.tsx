@@ -42,12 +42,14 @@ export interface ImageImportProps extends StylesApiProps<ImageImportFactory>
 // eslint-disable-next-line react/display-name
 const ImageImport_ = forwardRef<HTMLImageElement, ImageImportProps> ((props, ref) =>
 {
-  const { classNames, import: import_, styles } = props
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { classNames, import: import_, styles, vars, ...rest } = props
   const r = ! (import_ instanceof Object)
   const alt = useMemo (() => (r ? undefined : (import_ as ImageType).alt) ?? 'picture', [r, import_])
   const src = useHRef (r ? import_ as string : (import_ as ImageType).src)
 
-  return <div className={classNames?.root}
+  return <div {...rest}
+              className={classNames?.root}
               ref={ref}
               style={{ ...(styles?.root ?? { }),
                        height: r ? undefined : (import_ as ImageType).height,

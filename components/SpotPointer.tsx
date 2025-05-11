@@ -30,28 +30,32 @@ export type SpotPointerFactory = PolymorphicFactory<{
   props: SpotPointerProps;
 }>
 
-export interface SpotPointerProps extends PointerContent, StylesApiProps<SpotPointerFactory>
+export interface SpotPointerProps extends StylesApiProps<SpotPointerFactory>
 {
   at: Point,
+  content: PointerContent['value'],
   radius: number,
+  type: PointerContent['type'],
 }
 
-type Cn = HTMLDivElement
-type Ps = SpotPointerProps
-type Pp = PolymorphicComponentProps<'div', SpotPointerProps>
+type Ct = HTMLDivElement
+type Cp = SpotPointerProps
+type Pp = PolymorphicComponentProps<'div', Cp>
 
 // eslint-disable-next-line react/display-name
-export const SpotPointer = createPolymorphicComponent<'div', Ps> (forwardRef<Cn, Pp> ((props, ref) =>
+export const SpotPointer = createPolymorphicComponent<'div', Cp> (forwardRef<Ct, Pp> ((props, ref) =>
 {
-  const { at, component, radius, type, value } = props
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { at, component, content, radius, type, vars, ...rest } = props
   const [ height, width ] = [ radius, radius ]
   const [ left, top ] = at.map (e => e - radius / 2)
 
-  return <Box className={css.mapSpotPointer}
+  return <Box {...rest}
+              className={css.mapSpotPointer}
               component={component}
               ref={ref}
-              style={{ backgroundColor: 'color' !== type ? undefined : value as string,
+              style={{ backgroundColor: 'color' !== type ? undefined : content as string,
                        height, left, top, width }}>
-    { 'image' === type && <ImageImport import={value} /> }
+    { 'image' === type && <ImageImport import={content} /> }
   </Box>
 }))

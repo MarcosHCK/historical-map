@@ -15,11 +15,11 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export function mapMap<R, K extends number | string | symbol, V> (map: Map<K, V>, mapFn: (v: V, i: number) => R)
+export function mapMap<R, K extends number | string | symbol, V> (map: Map<K, V>, mapFn: (v: V, i: number, k: K) => R)
 {
   const ar: R[] = [ ]
 
   let i = 0
-  map.forEach (v => { ar.push (mapFn (v, i++)) })
+  map.forEach ((v, k) => { ar.push (mapFn (v, i++, k)) })
 return ar
 }
