@@ -76,7 +76,7 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
                           break; }
           case  'halt': { const desc = action.value as HaltAction | undefined
                           const duration = takeProperty (desc?.duration, reason, 400)
-                          if (reason === 'step') halt (duration)
+                          halt (duration)
                           break; }
           default: throw Error (`Unknown spot action '${(action as { type: string }).type}'`)
         }
