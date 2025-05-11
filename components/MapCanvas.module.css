@@ -43,4 +43,10 @@
   min-width: 100%;
   position: absolute;
   z-index: 30;
+
+  @media (hover: none) and (pointer: coarse)
+    {
+      opacity: 1;
+      display: inherit !important;
+    }
 }
