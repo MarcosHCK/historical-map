@@ -53,9 +53,9 @@ export const App = ({ Component, pageProps }: any) =>
   return <MantineProvider defaultColorScheme='auto' theme={theme}>
 
     <Head>
-      
+
       <title>Historical maps</title>
-      
+
       <meta content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no' name='viewport' />
       <link rel='shortcut icon' href={useHRef ('/favicon.ico')} />
     </Head>

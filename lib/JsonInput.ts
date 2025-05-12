@@ -89,12 +89,9 @@ export class JsonInput
           const errors = this._validator.errors!.map (e =>
             { const location = e.instancePath ?? '(root)'
               const message = `At ${location}: ${e.message}`
-              return new Error (message, { cause: 'json validator' }) })
-          const message = this._validator.errors!.map (e =>
-            { const location = e.instancePath ?? '(root)'
-              return `At ${location}: ${e.message}` })
+              return new Error (message, { cause: 'validation' }) })
 
-          throw new AggregateError (errors, ['invalid JSON value',...message].join ('\n'), { cause: 'json validator' })
+          throw new AggregateError (errors, 'invalid JSON value', { cause: 'validation' })
         }
     return true
     }

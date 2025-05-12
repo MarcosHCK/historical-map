@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import schema from './MapDescriptor.json'
+import { Behavior } from './scrollTo'
 import { JsonInput } from './JsonInput'
+import { type StepReason } from './Animator'
+import schema from './MapDescriptor.json'
 export const input = new JsonInput (schema)
 export default input
 
@@ -24,11 +26,11 @@ export type ActionDescriptor = { enabled?: ActionReason[] }
                              |  { type: 'halt', value?: HaltAction })
 
 export type ActionProperty<T> = T | { [P in ActionReason]?: T }
-export type ActionReason = 'seek' | 'step'
+export type ActionReason = StepReason
 
 export interface FocusAction
 {
-  behavior: ActionProperty<'ease-in-out' | 'linear'>,
+  behavior: ActionProperty<Behavior>,
   duration: ActionProperty<number>,
 }
 

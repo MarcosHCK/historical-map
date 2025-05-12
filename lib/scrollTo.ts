@@ -17,12 +17,12 @@
 
 export interface ScrollToOptions
 {
-  behavior: keyof typeof behaviors,
+  behavior: Behavior,
   duration: number,
   position: { x: number, y: number },
 }
 
-type Behavior = (t: number) => number
+export type Behavior = keyof typeof behaviors
 
 const behaviors =
 {
@@ -32,7 +32,7 @@ const behaviors =
 
 export function scrollTo (tag: HTMLDivElement, { behavior, duration, position }: ScrollToOptions)
 {
-  let func: Behavior
+  let func: (t: number) => number
   if ((func = behaviors[behavior]) === undefined)
     throw Error (`Unknown behavior '${behavior}'`)
 
