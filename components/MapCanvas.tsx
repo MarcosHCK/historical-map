@@ -25,10 +25,10 @@ import { type Map } from '../lib/Map'
 import { type Spot } from '../lib/Spot'
 import { type StepReason } from '../lib/Animator'
 import { useAnimator } from '../hooks/useAnimator'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDragScrolling } from '../hooks/useDragScroll'
 import { useHaltController } from '../hooks/useHaltController'
-import { useHover, useMergedRef } from '@mantine/hooks'
+import { useDisclosure, useHover, useMergedRef } from '@mantine/hooks'
 import css from './MapCanvas.module.css'
 
 function actionEnabled (desc: ActionDescriptor, reason: StepReason)
@@ -50,12 +50,15 @@ function takeProperty<T> (prop: undefined | T | { [P in StepReason]?: T }, reaso
 export const MapCanvas = ({ map }: { map?: Map }) =>
 {
   const { halt, halted } = useHaltController ()
+  const [ sliderOpened, { close: closeSlider, toggle: toggleSlider } ] = useDisclosure (false)
   const [ velocity, setVelocity ] = useState (100)
   const { ref: hover1Ref, hovered: hover1Bar } = useHover ()
   const { ref: hover2Ref, hovered: hover2Bar } = useHover ()
   const hoverBar = hover1Bar || hover2Bar
   const cancelFocusRef = useRef<() => void> (() => {})
   const { active, moveRef, viewportRef } = useDragScrolling ({ onDrag: () => cancelFocusRef.current () })
+
+  useEffect (() => { if (! hoverBar) closeSlider () }, [closeSlider, hoverBar])
 
   const onSpot = useCallback ((code: string, reason: StepReason) =>
     {
@@ -119,11 +122,12 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
             { state === 'play' ? <PiPauseFill /> : <PiPlayFill /> }
           </Button>
 
-          <Popover position='top-start' withinPortal={false}>
+          <Popover onDismiss={closeSlider} opened={sliderOpened} position='top-start' withinPortal={false}>
 
             <Popover.Target>
 
-              <Button color='white' variant='transparent'> <PiFastForwardFill /> </Button>
+              <Button color='white' onClick={toggleSlider} variant='transparent'>
+                <PiFastForwardFill /> </Button>
             </Popover.Target>
 
             <Popover.Dropdown w={300}>
