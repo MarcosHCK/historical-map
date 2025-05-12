@@ -150,8 +150,9 @@ export class Animator
               cursor.height = img.height
               cursor.scale = new Two.Vector (size / img.width, size / img.height)
               cursor.width = img.width
-            })
-        })
+
+              two.update ()
+        }) })
 
       two.bind ('update', () => this._render ())
     }
