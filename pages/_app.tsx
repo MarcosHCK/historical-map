@@ -21,7 +21,7 @@ import { MapsIndex } from '../components/MapsIndex'
 import { Notifications } from '@mantine/notifications'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { theme } from '../theme'
-import { useDisclosure } from '@mantine/hooks'
+import { useClickOutside, useDisclosure } from '@mantine/hooks'
 import { useEffect, useState } from 'react'
 import { useHRef } from '../hooks/useHRef'
 import { useRouter } from 'next/router'
@@ -41,6 +41,7 @@ export const App = ({ Component, pageProps }: any) =>
 {
   const [ opened, { close, toggle } ] = useDisclosure (false)
   const [ queryClient ] = useState (new QueryClient ())
+  const insideRef = useClickOutside (close)
   const router = useRouter () 
 
   useEffect (() =>
@@ -87,7 +88,7 @@ export const App = ({ Component, pageProps }: any) =>
 
         <AppShell.Navbar>
 
-          <MapsIndex />
+          <MapsIndex ref={insideRef} />
         </AppShell.Navbar>
       </AppShell>
     </QueryClientProvider>

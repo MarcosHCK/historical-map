@@ -16,14 +16,14 @@
  */
 import { getTreeExpandedState, Group, Stack, Text, Tree, useTree } from '@mantine/core'
 import { PiFolder, PiFolderOpen, PiMapTrifold } from 'react-icons/pi'
-import { type MapsIndex } from '../lib/MapsIndex'
+import { type MapsIndex as _MapsIndex } from '../lib/MapsIndex'
 import { type MapsIndexEntry } from '../lib/MapsIndex'
 import { type MapsIndexEntryGroup } from '../lib/MapsIndex'
 import { type MapsIndexEntryMap } from '../lib/MapsIndex'
 import { type RenderTreeNodePayload, type TreeNodeData } from '@mantine/core'
 import { useHRef } from '../hooks/useHRef'
 import { useMapsIndex } from '../hooks/useMapsIndex'
-import { useMemo } from 'react'
+import { forwardRef, useMemo } from 'react'
 import Link from 'next/link'
 
 function parseGroup (group: MapsIndexEntryGroup): TreeNodeData
@@ -33,7 +33,7 @@ function parseGroup (group: MapsIndexEntryGroup): TreeNodeData
   return { children, label, value: '' }
 }
 
-function parseIndex (index: MapsIndex)
+function parseIndex (index: _MapsIndex)
 {
   return parseGroup ({ ...index, title: '' }).children!
 }
@@ -75,12 +75,20 @@ function Leaf ({ node, expanded, hasChildren, elementProps }: RenderTreeNodePayl
   </Group>
 }
 
-export function MapsIndex ()
+export interface MapsIndexProps
 {
-  const indexUrl = useHRef ('/index.json')
-  const index = useMapsIndex (indexUrl!)
+  indexFile?: string,
+}
+
+type Ct = HTMLDivElement
+type Cp = MapsIndexProps
+
+// eslint-disable-next-line react/display-name
+export const MapsIndex = forwardRef<Ct, Cp> (({ indexFile = '/index.json' }, ref) =>
+{
+  const index = useMapsIndex (useHRef (indexFile))
 
   const tree = useMemo (() => ! index ? [] : parseIndex (index), [index])
   const store = useTree ({ initialExpandedState: getTreeExpandedState (tree, '*') })
-  return <Stack p='md'> <Tree data={tree} renderNode={props => <Leaf {...props} />} tree={store} /> </Stack>
-}
+  return <Stack p='md' ref={ref}> <Tree data={tree} renderNode={props => <Leaf {...props} />} tree={store} /> </Stack>
+})

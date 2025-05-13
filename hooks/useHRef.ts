@@ -33,7 +33,10 @@ function norm (url: string)
   return url.endsWith ('/') ? url : `${url}/`
 }
 
-export function useHRef (url?: string, altBasePath: string | undefined = undefined)
+export function useHRef (url: string, altBasePath?: string): string;
+export function useHRef (url: undefined, altBasePath?: string): undefined;
+
+export function useHRef (url?: string, altBasePath?: string)
 {
   const router = useRouter ()
   const basePath = useMemo (() => norm (router.basePath), [router])
