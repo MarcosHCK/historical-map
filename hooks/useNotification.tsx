@@ -18,6 +18,7 @@ import { PiWarningCircleLight } from 'react-icons/pi'
 import { showNotification } from '@mantine/notifications'
 import { Text } from '@mantine/core'
 import { useDebouncedCallback } from '@mantine/hooks'
+import { useCallback, useMemo } from 'react'
 
 type Exception = { title: string, message: React.ReactNode, reportable?: boolean }
 
@@ -72,6 +73,6 @@ function wrapAggregate (error: AggregateError)
 export function useNotification<T = unknown> (delay: number = 0): NotificationHandler<T>
 {
   const delayed = useDebouncedCallback (sortDataType, delay)
-  const push = (data: T) => { delayed (data); return data }
-return { flush: delayed.flush, push }
+  const push = useCallback ((data: T) => { delayed (data); return data }, [delayed])
+return useMemo (() => ({ flush: delayed.flush, push }), [delayed, push])
 }
