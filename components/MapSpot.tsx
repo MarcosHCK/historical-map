@@ -16,10 +16,10 @@
  */
 import { createPolymorphicComponent, type PolymorphicComponentProps, Stack, Text } from '@mantine/core'
 import { forwardRef, type ReactNode, useMemo } from 'react'
-import { ImageImport, ImageImportProps } from './ImageImport'
+import { ImageImport, type ImageImportProps } from './ImageImport'
 import { PopoverMapSpot } from './PopoverMapSpot'
 import { type Spot } from '../lib/Spot'
-import { type SpotContent } from '../lib/MapDescriptor'
+import { type PopoverSpotOptions, type SpotContent } from '../lib/MapDescriptor'
 import { type SpotContentOptions } from '../lib/MapDescriptor'
 import { type Text as TextType, type TextImport } from '../lib/MapDescriptor'
 import { type UseTextReturn, useText } from '../hooks/useText'
@@ -91,7 +91,9 @@ export const MapSpot = createPolymorphicComponent<'div', Cp> (forwardRef<Ct, Pp>
 
   switch (spot.type)
     {
-      case 'popover': return <PopoverMapSpot {...rest} ref={ref} spot={spot}> <Content content={spot.options.content} /> </PopoverMapSpot>
+      case 'hidden': return <></>
+      case 'popover': { const spot_ = spot as Spot<'popover', PopoverSpotOptions>
+                        return <PopoverMapSpot {...rest} ref={ref} spot={spot_}> <Content content={spot_.options.content} /> </PopoverMapSpot> }
       default: throw Error (`Unknown error ${spot.type}`)
     }
 }))

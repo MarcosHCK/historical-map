@@ -17,20 +17,21 @@
 import { type Point } from './Walk'
 import { type SpotDescriptor, type ActionDescriptor } from './MapDescriptor'
 
-export class Spot
+export class Spot<Tt = SpotDescriptor['options']['type'],
+                  Vt = SpotDescriptor['options']['value']>
 {
 
   private _actions: ActionDescriptor[]
-  private _options: SpotDescriptor['options']['value']
+  private _options: Vt
   private _position: Point
-  private _type: SpotDescriptor['options']['type']
+  private _type: Tt
 
   public get actions () { return this._actions }
   public get options () { return this._options }
   public get position () { return this._position }
   public get type () { return this._type }
 
-  constructor (actions: ActionDescriptor[], options: SpotDescriptor['options'], position: Point)
+  constructor (actions: ActionDescriptor[], options: { type: Tt, value: Vt } & SpotDescriptor['options'], position: Point)
     {
       this._actions = actions
       this._options = options.value

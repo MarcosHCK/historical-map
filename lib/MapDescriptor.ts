@@ -92,7 +92,8 @@ export interface SpotDescriptor
   options: SpotDescriptorOptions,
 }
 
-export type SpotDescriptorOptions = { type: 'popover', value: PopoverSpotOptions }
+export type SpotDescriptorOptions = { type: 'hidden', value: undefined }
+                                  | { type: 'popover', value: PopoverSpotOptions }
 
 export interface Text
 {

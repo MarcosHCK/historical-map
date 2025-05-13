@@ -20,6 +20,7 @@ import { SpotPointer } from './SpotPointer'
 import { type Spot } from '../lib/Spot'
 import { useHover, useMergedRef } from '@mantine/hooks'
 import css from './MapSpot.module.css'
+import { PopoverSpotOptions } from '../lib/MapDescriptor'
 
 function useEaseOutValue (value: boolean, wait: number)
 {
@@ -37,7 +38,7 @@ return debounced
 export interface PopoverMapSpotProps
 {
   children?: React.ReactNode,
-  spot: Spot,
+  spot: Spot<'popover', PopoverSpotOptions>,
 }
 
 type Ct = HTMLDivElement
