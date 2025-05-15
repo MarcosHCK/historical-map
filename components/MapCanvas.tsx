@@ -59,6 +59,9 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
   const { active, moveRef, viewportRef } = useDragScrolling ({ onDrag: () => cancelFocusRef.current () })
 
   useEffect (() => { if (! hoverBar) closeSlider () }, [closeSlider, hoverBar])
+  useEffect (() => { if (map) { const position = map?.walk.getPointAtLength (0)
+                                scrollToCentered (viewportRef.current!, { behavior: 'linear', position, duration: 0 })
+                   }}, [map, viewportRef])
 
   const onSpot = useCallback ((code: string, reason: StepReason) =>
     {
