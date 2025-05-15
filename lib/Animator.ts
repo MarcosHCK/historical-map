@@ -15,8 +15,8 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Hooks } from './Hooks'
-import { Map } from './Map'
-import { Sprite } from 'two.js/src/effects/sprite'
+import { type Map } from './Map'
+import { type Sprite } from 'two.js/src/effects/sprite'
 import { type Walk } from './Walk'
 import Two from 'two.js'
 
@@ -134,21 +134,21 @@ export class Animator
           two.width = (canvas.width = img.width)
           two.renderer.setSize (img.width, img.height)
 
-          background.noStroke ()
-          background.translation.set (img.width / 2, img.height / 2)
           background.height = img.height
-          background.width = img.width
+          background.noStroke ()
+          background.opacity = 1
           background.scale = 1
-          background.opacity = 1;
+          background.translation.set (img.width / 2, img.height / 2)
+          background.width = img.width
 
           cursor.texture = two.makeTexture (map.cursor.img, () =>
             {
               const img = map.cursor.img
               const [ sx, sy ] = map.cursor.getSize (this._cursorSize)
 
+              cursor.height = img.height
               cursor.noStroke ()
               cursor.opacity = 1
-              cursor.height = img.height
               cursor.scale = new Two.Vector (sx / img.width, sy / img.height)
               cursor.width = img.width
 

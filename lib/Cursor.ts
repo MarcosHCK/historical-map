@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Image } from '../hooks/useImage'
 import { type CursorDescriptor } from './MapDescriptor'
+import { type Image } from '../hooks/useImage'
 
 export class Cursor
 {
