@@ -14,14 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Group } from '@mantine/core'
-import { MapsIndex } from '../components/MapsIndex'
+import { forwardRef } from 'react'
+import { useHRef } from '../hooks/useHRef'
+import { useImage } from '../hooks/useImage'
 
-export const IndexPage = () =>
+type Ct = HTMLImageElement
+type Cp = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>
+
+// eslint-disable-next-line react/display-name
+export const AppIcon = forwardRef<Ct, Cp> ((props, ref) =>
 {
-  return <Group mt={50} justify="center">
-      <MapsIndex />
-    </Group>
-}
-
-export default IndexPage
+  const img = useImage (useHRef ('/favicon.ico'))
+  // eslint-disable-next-line @next/next/no-img-element
+return <img alt='icon' {...props} ref={ref} src={img?.src} />
+})

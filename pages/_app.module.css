@@ -19,6 +19,7 @@
 {
   align-items: center;
   justify-content: space-between;
+  max-height: var(--app-shell-header-height);
   min-height: 100%;
   padding-left: var(--mantine-spacing-lg);
   padding-right: var(--mantine-spacing-lg);

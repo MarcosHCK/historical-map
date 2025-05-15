@@ -16,20 +16,18 @@
  */
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
-import { AppShell, Burger, Grid, Group, MantineProvider, rem } from '@mantine/core'
-import { MapsIndex } from '../components/MapsIndex'
+import { AppIcon } from '../components/AppIcon'
+import { AppShell, Grid, Group, MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { theme } from '../theme'
-import { useClickOutside, useDisclosure } from '@mantine/hooks'
-import { useEffect, useState } from 'react'
 import { useHRef } from '../hooks/useHRef'
-import { useRouter } from 'next/router'
 import css from './_app.module.css'
 import Head from 'next/head'
+import React, { useState } from 'react'
+import Link from 'next/link'
 
 const headerHeightPx = 70
-const breakpointWidthPx = 200
 
 const columns = 32 as const
 const spaceSizes = { base: 0, sm: 1 } as const
@@ -39,17 +37,7 @@ const centerSizes = Object.fromEntries (centerSizeTuples)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const App = ({ Component, pageProps }: any) =>
 {
-  const [ opened, { close, toggle } ] = useDisclosure (false)
   const [ queryClient ] = useState (new QueryClient ())
-  const insideRef = useClickOutside (close)
-  const router = useRouter () 
-
-  useEffect (() =>
-    {
-      const handleRouting = () => close ()
-                     router.events.on ('routeChangeStart', handleRouting)
-      return () => { router.events.off ('routeChangeStart', handleRouting) }
-    }, [close, router])
 
   return <MantineProvider defaultColorScheme='auto' theme={theme}>
 
@@ -65,16 +53,14 @@ export const App = ({ Component, pageProps }: any) =>
     <QueryClientProvider client={queryClient}>
 
       <AppShell header={{ height: headerHeightPx }}
-                navbar={{ breakpoint: breakpointWidthPx,
-                          collapsed: { desktop: !opened, mobile: !opened },
-                              width: { base: '90vw', xs: rem (400) } }}
                 padding='md'>
 
         <AppShell.Header>
 
           <Group className={css.appShellHeaderGroup}>
 
-            <Burger opened={opened} onClick={toggle} />
+            <Link href={'/'} style={{ height: headerHeightPx - 13 * 2 }}>
+              <AppIcon height={headerHeightPx - 13 * 2} /> </Link>
           </Group>
         </AppShell.Header>
 
@@ -85,11 +71,6 @@ export const App = ({ Component, pageProps }: any) =>
             <Grid.Col className={css.appShellMainCol} offset={spaceSizes} span={centerSizes}> <Component {...pageProps} /> </Grid.Col>
           </Grid>
         </AppShell.Main>
-
-        <AppShell.Navbar>
-
-          <MapsIndex ref={insideRef} />
-        </AppShell.Navbar>
       </AppShell>
     </QueryClientProvider>
   </MantineProvider>
