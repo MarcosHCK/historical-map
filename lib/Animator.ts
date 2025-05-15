@@ -58,6 +58,27 @@ export class Animator
   cleanup () { this._two.pause (); this._two.clear (); this._onSpot.clear () }
   clear () { this._two.clear () }
 
+  static createRenderer (options: ConstructorParameters<typeof Two>[0])
+    {
+      const types = [ Two.Types.webgl, Two.Types.canvas ]
+
+      for (let i = 0; i < types.length; ++i) try
+        {
+          const type = types[i]
+          return new Two ({ ...options, type })
+        }
+      catch (error)
+        {
+
+          if (! (error instanceof Error))
+            throw error
+
+          else if (error.name != 'Two.js')
+            throw error
+        }
+      throw Error (`Can't create a renderer instance on this browser`)
+    }
+
   onSpot = { connect: (callback: (...args: OnSpotArgs) => void) => this._onSpot.add (callback),
              disconnect: (id: number) => this._onSpot.del (id) }
 
@@ -116,8 +137,7 @@ export class Animator
 
   constructor (canvas: HTMLCanvasElement, map: Map)
     {
-      const type  = Two.Types.canvas
-      const two = new Two ({ autostart: false, domElement: canvas, type })
+      const two = Animator.createRenderer ({ autostart: false, domElement: canvas })
 
       const background = two.makeRectangle (0, 0, two.width, two.height)
       const cursor = two.makeSprite (undefined, 0, 0)
