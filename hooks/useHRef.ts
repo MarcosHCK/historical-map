@@ -35,6 +35,7 @@ function norm (url: string)
 
 export function useHRef (url: string, altBasePath?: string): string;
 export function useHRef (url: undefined, altBasePath?: string): undefined;
+export function useHRef (url?: string, altBasePath?: string): string | undefined;
 
 export function useHRef (url?: string, altBasePath?: string)
 {

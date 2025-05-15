@@ -22,11 +22,12 @@ import { useImage } from '../hooks/useImage'
 import { useMapDescriptor } from '../hooks/useMapDescriptor'
 import { useMapWalkPath } from '../hooks/useMapWalkPath'
 import { useMemo } from 'react'
+import { useCursor } from '../hooks/useCursor'
 
 const MapMain = ({ meta }: { meta: string }) =>
 {
   const desc = useMapDescriptor (useHRef (meta)!)
-  const cursor = useImage (useHRef (desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg')))
+  const cursor = useCursor (desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg'))
   const texture = useImage (useHRef (desc?.textureFile))
   const walk = useMapWalkPath (useHRef (desc?.walkFile))
   const map = useMemo (() => desc && cursor && texture && walk && new Map (desc, cursor, texture, walk),

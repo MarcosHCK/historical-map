@@ -28,6 +28,8 @@ export type ActionDescriptor = { enabled?: ActionReason[] }
 export type ActionProperty<T> = T | { [P in ActionReason]?: T }
 export type ActionReason = StepReason
 
+export type CursorDescriptor = string | Omit<Image, 'alt'>
+
 export interface FocusAction
 {
   behavior: ActionProperty<Behavior>,
@@ -51,7 +53,7 @@ export type ImageImport = string | Image
 
 export interface MapDescriptor
 {
-  cursor?: string,
+  cursor?: CursorDescriptor,
   scale?: number,
   spots?: SpotDescriptor[],
   textureFile: string,

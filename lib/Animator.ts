@@ -37,11 +37,12 @@ export class Animator
   private _walk: Walk | undefined = undefined
   private _walked: number = 0
 
-  private get _cursorSize ()
+  private get _cursorSize (): [number, number]
     {
       const two = this._two
       const max = Math.max (two.height, two.width)
-      return Math.max (27, max / 60)
+      const size = Math.max (27, max / 60)
+      return [ size, size ]
     }
 
   private get _totalLength ()
@@ -140,15 +141,15 @@ export class Animator
           background.scale = 1
           background.opacity = 1;
 
-          cursor.texture = two.makeTexture (map.cursor, () =>
+          cursor.texture = two.makeTexture (map.cursor.img, () =>
             {
-              const img = map.cursor
-              const size = this._cursorSize
-    
+              const img = map.cursor.img
+              const [ sx, sy ] = map.cursor.getSize (this._cursorSize)
+
               cursor.noStroke ()
               cursor.opacity = 1
               cursor.height = img.height
-              cursor.scale = new Two.Vector (size / img.width, size / img.height)
+              cursor.scale = new Two.Vector (sx / img.width, sy / img.height)
               cursor.width = img.width
 
               two.update ()

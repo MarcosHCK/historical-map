@@ -16,6 +16,7 @@
  */
 export { MapClass as Map }
 import { Spot } from './Spot'
+import { type Cursor } from './Cursor'
 import { type Image } from '../hooks/useImage'
 import { type MapDescriptor } from './MapDescriptor'
 import { type Point, type Walk } from './Walk'
@@ -23,7 +24,7 @@ import { type Point, type Walk } from './Walk'
 class MapClass
 {
 
-  private _cursor: Image
+  private _cursor: Cursor
   private _scale: number
   private _spots: Map<string, Spot>
   private _texture: Image
@@ -35,7 +36,7 @@ class MapClass
   public get texture () { return this._texture }
   public get walk () { return this._walk }
 
-  constructor (desc: MapDescriptor, cursor: Image, texture: Image, walk: Walk)
+  constructor (desc: MapDescriptor, cursor: Cursor, texture: Image, walk: Walk)
     {
       this._cursor = cursor
       this._scale = desc.scale ?? 1
