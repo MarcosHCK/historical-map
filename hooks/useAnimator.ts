@@ -38,15 +38,17 @@ export type UseAnimatorResult =
 export interface UseAnimatorArgs
 {
   map?: Map,
+  onLoad?: (...args: []) => void,
   onSpot?: (...args: [string, StepReason]) => void,
   pace?: number,
 }
 
 export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
 {
-  const { map, onSpot, pace = 1 } = args
+  const { map, onSpot, onLoad, pace = 1 } = args
   const animatorRef = useRef<Animator> (null)
-  const callbackRef = useRef<UseAnimatorArgs['onSpot']> (null)
+  const onSpotRef = useRef<UseAnimatorArgs['onSpot']> (null)
+  const onLoadRef = useRef<UseAnimatorArgs['onLoad']> (null)
   const canvasRef = useRef<HTMLCanvasElement> (null)
   const [ state, setState ] = useState<AnimationState> ('pause')
 
@@ -55,13 +57,15 @@ export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
       const canvas = canvasRef.current!
       const animator = new Animator (canvas, map)
 
-      animator.onSpot.connect ((...args) => (callbackRef.current ?? (() => {})) (...args))
+      animator.onLoad.connect ((...args) => (onLoadRef.current ?? (() => {})) (...args))
+      animator.onSpot.connect ((...args) => (onSpotRef.current ?? (() => {})) (...args))
       animator.reset ()
 
       return (animatorRef.current = animator, () => animator.cleanup ())
     }}, [map])
 
-  useEffect (() => { callbackRef.current = onSpot ?? null }, [onSpot])
+  useEffect (() => { onLoadRef.current = onLoad ?? null }, [onLoad])
+  useEffect (() => { onSpotRef.current = onSpot ?? null }, [onSpot])
 
   useEffect (() =>
     {

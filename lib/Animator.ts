@@ -20,6 +20,7 @@ import { type Sprite } from 'two.js/src/effects/sprite'
 import { type Walk } from './Walk'
 import Two from 'two.js'
 
+type OnLoadArgs = []
 type OnSpotArgs = [string, StepReason]
 
 export type AnimationState = 'pause' | 'play'
@@ -30,6 +31,7 @@ export class Animator
 {
   private _cursor: Sprite
   private _lastPoint: number = 0
+  private _onLoad = new Hooks<OnLoadArgs, void> ()
   private _onSpot = new Hooks<OnSpotArgs, void> ()
   private _seeking: boolean = false
   private _step: number = 0
@@ -79,6 +81,8 @@ export class Animator
       throw Error (`Can't create a renderer instance on this browser`)
     }
 
+  onLoad = { connect: (callback: (...args: OnLoadArgs) => void) => this._onLoad.add (callback),
+             disconnect: (id: number) => this._onLoad.del (id) }
   onSpot = { connect: (callback: (...args: OnSpotArgs) => void) => this._onSpot.add (callback),
              disconnect: (id: number) => this._onSpot.del (id) }
 
@@ -143,6 +147,7 @@ export class Animator
       const cursor = two.makeSprite (undefined, 0, 0)
 
       this._cursor = cursor
+      this._onLoad.add (() => two.update ())
       this._two = two
       this._walk = map.walk
 
@@ -172,7 +177,7 @@ export class Animator
               cursor.scale = new Two.Vector (sx / img.width, sy / img.height)
               cursor.width = img.width
 
-              two.update ()
+              this._onLoad.call ()
         }) })
 
       two.bind ('update', () => this._render ())

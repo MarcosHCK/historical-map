@@ -63,6 +63,12 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
                                 scrollToCentered (viewportRef.current!, { behavior: 'linear', position, duration: 0 })
                    }}, [map, viewportRef])
 
+  const onLoad = useCallback (() =>
+    {
+      const position = map?.walk.getPointAtLength (0)
+      if (position) scrollToCentered (viewportRef.current!, { behavior: 'linear', position, duration: 0 })
+    }, [map, viewportRef])
+
   const onSpot = useCallback ((code: string, reason: StepReason) =>
     {
       let spot: Spot | undefined
@@ -88,7 +94,7 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
         }
     }, [map, halt, viewportRef])
 
-  const [ canvasRef, { pause, reset, seek, state, toggle } ] = useAnimator ({ map, onSpot, pace: (halted ? 0 : 1) * velocity / 100 })
+  const [ canvasRef, { pause, reset, seek, state, toggle } ] = useAnimator ({ map, onLoad, onSpot, pace: (halted ? 0 : 1) * velocity / 100 })
   const lengths = useMemo (() => map?.walk?.spots?.reduce ((a, { at, code }) => (a.set (code, at), a), new globalThis.Map<string, number> ()), [map])
 
   const resetAnimation = useCallback (() => { if (!! map) { pause (); reset () }}, [map, pause, reset])
