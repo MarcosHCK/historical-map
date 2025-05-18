@@ -17,21 +17,21 @@
 export { MapMain as Map }
 import { Map } from '../lib/Map'
 import { MapCanvas } from './MapCanvas'
+import { useBackground } from '../hooks/useBackground'
+import { useCursor } from '../hooks/useCursor'
 import { useHRef } from '../hooks/useHRef'
-import { useImage } from '../hooks/useImage'
 import { useMapDescriptor } from '../hooks/useMapDescriptor'
 import { useMapWalkPath } from '../hooks/useMapWalkPath'
 import { useMemo } from 'react'
-import { useCursor } from '../hooks/useCursor'
 
 const MapMain = ({ meta }: { meta: string }) =>
 {
   const desc = useMapDescriptor (useHRef (meta)!)
+  const background = useBackground (desc?.background)
   const cursor = useCursor (desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg'))
-  const texture = useImage (useHRef (desc?.textureFile))
   const walk = useMapWalkPath (useHRef (desc?.walkFile))
-  const map = useMemo (() => desc && cursor && texture && walk && new Map (desc, cursor, texture, walk),
-                            [desc, cursor, texture, walk])
+  const map = useMemo (() => cursor && background && desc && walk && new Map (desc, background, cursor, walk),
+                            [cursor, background, desc, walk])
 
   return ! map ? <MapCanvas /> : <MapCanvas map={map} />
 }

@@ -15,6 +15,8 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Hooks } from './Hooks'
+import { type Background, type Patch } from './Background'
+import { type Cursor } from './Cursor'
 import { type Map } from './Map'
 import { type Sprite } from 'two.js/src/effects/sprite'
 import { type Walk } from './Walk'
@@ -29,7 +31,7 @@ export type Whence = 'cur' | 'end' | 'set'
 
 export class Animator
 {
-  private _cursor: Sprite
+  private _cursor?: Sprite
   private _lastPoint: number = 0
   private _onLoad = new Hooks<OnLoadArgs, void> ()
   private _onSpot = new Hooks<OnSpotArgs, void> ()
@@ -79,6 +81,80 @@ export class Animator
             throw error
         }
       throw Error (`Can't create a renderer instance on this browser`)
+    }
+
+  private async _load (canvas: HTMLCanvasElement, map: Map)
+    {
+      const [ width, height ] = await this._loadBackground (map.background)
+
+      this._cursor = await this._loadCursor (map.cursor)
+      this._two.height = (canvas.height = height)
+      this._two.width = (canvas.width = width)
+      this._two.renderer.setSize (width, height)
+    }
+
+  private async _loadBackground (background: Background)
+    {
+      let height = 0, width = 0
+      const patches = background.patches
+
+      const ps = patches.map (e => this._loadBackgroundPiece (e))
+      const ar = await Promise.all (ps)
+
+      for (let i = 0; i < ar.length; ++i)
+        { const [ l, t, w, h ] = ar[i]; height = Math.max (height, t + h)
+                                         width = Math.max ( width, l + w) }
+    return [ width, height ] as [number, number]
+    }
+
+  private async _loadBackgroundPiece ({ height, img, left, top, width }: Patch)
+    {
+      const texture = await this._loadTexture (img)
+
+      const both = height === undefined && width === undefined
+      const rect = this._two.makeRectangle (left, top, img.width, img.height)
+      const sizeX = both ? img.width : (width ?? img.width * (height! / img.height))
+      const sizeY = both ? img.height : (height ?? img.height * (width! / img.width))
+      const scale = [ sizeX / img.width, sizeY / img.height ]
+
+      rect.fill = texture
+      rect.noStroke ()
+      rect.opacity = 1
+      rect.scale = new Two.Vector (...scale)
+      rect.translation.set (left + img.width / 2, top + img.height / 2)
+
+      return [ left, top, img.width * scale[0], img.height * scale[1] ] as
+             [number, number, number, number]
+    }
+
+  private async _loadCursor (cursor: Cursor)
+    {
+      const img = cursor.img
+      const texture = await this._loadTexture (img)
+
+      const [ sx, sy ] = cursor.getSize (this._cursorSize)
+      const scale = [ sx / img.width, sy / img.height ]
+      const sprite = this._two.makeSprite (undefined, 0, 0)
+
+      sprite.noStroke ()
+      sprite.opacity = 1
+      sprite.scale = new Two.Vector (...scale)
+      sprite.texture = texture
+    return sprite
+    }
+
+  private _loadTexture (img: HTMLImageElement)
+    {
+      const two = this._two
+      type Rt = ReturnType<typeof two.makeTexture>
+
+      return new Promise<Rt> (resolve =>
+        {
+          let texture: Rt | undefined = undefined
+          const callback = () => resolve (texture!)
+
+          texture = two.makeTexture (img, () => queueMicrotask (callback))
+        })
     }
 
   onLoad = { connect: (callback: (...args: OnLoadArgs) => void) => this._onLoad.add (callback),
@@ -132,7 +208,7 @@ export class Animator
 
   private _renderAt (at: number)
     {
-
+      if (! this._cursor) return
       const next = this._walk!.getPropertiesAtLength (at)
 
       this._cursor.rotation = Math.atan2 (next.tangentY, next.tangentX)
@@ -143,42 +219,11 @@ export class Animator
     {
       const two = Animator.createRenderer ({ autostart: false, domElement: canvas })
 
-      const background = two.makeRectangle (0, 0, two.width, two.height)
-      const cursor = two.makeSprite (undefined, 0, 0)
-
-      this._cursor = cursor
       this._onLoad.add (() => two.update ())
       this._two = two
       this._walk = map.walk
 
-      background.fill = two.makeTexture (map.texture, () =>
-        {
-          const img = map.texture
-
-          two.height = (canvas.height = img.height)
-          two.width = (canvas.width = img.width)
-          two.renderer.setSize (img.width, img.height)
-
-          background.height = img.height
-          background.noStroke ()
-          background.opacity = 1
-          background.scale = 1
-          background.translation.set (img.width / 2, img.height / 2)
-          background.width = img.width
-
-          cursor.texture = two.makeTexture (map.cursor.img, () =>
-            {
-              const img = map.cursor.img
-              const [ sx, sy ] = map.cursor.getSize (this._cursorSize)
-
-              cursor.height = img.height
-              cursor.noStroke ()
-              cursor.opacity = 1
-              cursor.scale = new Two.Vector (sx / img.width, sy / img.height)
-              cursor.width = img.width
-
-              this._onLoad.call ()
-        }) })
+      this._load (canvas, map).then (() => this._onLoad.call ())
 
       two.bind ('update', () => this._render ())
     }

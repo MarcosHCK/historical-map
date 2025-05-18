@@ -28,6 +28,20 @@ export type ActionDescriptor = { enabled?: ActionReason[] }
 export type ActionProperty<T> = T | { [P in ActionReason]?: T }
 export type ActionReason = StepReason
 
+export interface BackgroundDescriptor
+{
+  patches: BackgroundPatch[],
+}
+
+export interface BackgroundPatch
+{
+  height?: number,
+  left: number,
+  src: string,
+  top: number,
+  width?: number,
+}
+
 export type CursorDescriptor = string | Omit<Image, 'alt'>
 
 export interface FocusAction
@@ -53,10 +67,10 @@ export type ImageImport = string | Image
 
 export interface MapDescriptor
 {
+  background: BackgroundDescriptor,
   cursor?: CursorDescriptor,
   scale?: number,
   spots?: SpotDescriptor[],
-  textureFile: string,
   version: string,
   walkFile: string,
 }

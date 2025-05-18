@@ -14,12 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-'use client';
 import { resolve } from 'url'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react';
 
-function abs (url: string, baseUrl: string)
+export function abs (url: string, baseUrl: string)
 {
   if (! url.startsWith ('/'))
 
@@ -39,7 +38,13 @@ export function useHRef (url?: string, altBasePath?: string): string | undefined
 
 export function useHRef (url?: string, altBasePath?: string)
 {
+  const basePath = useHRefBase ()
+return useMemo (() => url === undefined ? undefined : abs (url, altBasePath ?? basePath), [altBasePath, basePath, url])
+}
+
+export function useHRefBase ()
+{
   const router = useRouter ()
   const basePath = useMemo (() => norm (router.basePath), [router])
-return useMemo (() => url === undefined ? undefined : abs (url, altBasePath ?? basePath), [altBasePath, basePath, url])
+return basePath
 }

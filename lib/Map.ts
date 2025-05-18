@@ -16,32 +16,32 @@
  */
 export { MapClass as Map }
 import { Spot } from './Spot'
+import { type Background } from './Background'
 import { type Cursor } from './Cursor'
-import { type Image } from '../hooks/useImage'
 import { type MapDescriptor } from './MapDescriptor'
 import { type Point, type Walk } from './Walk'
 
 class MapClass
 {
 
+  private _background: Background
   private _cursor: Cursor
   private _scale: number
   private _spots: Map<string, Spot>
-  private _texture: Image
   private _walk: Walk
 
+  public get background () { return this._background }
   public get cursor () { return this._cursor }
   public get scale () { return this._scale }
   public get spots () { return this._spots }
-  public get texture () { return this._texture }
   public get walk () { return this._walk }
 
-  constructor (desc: MapDescriptor, cursor: Cursor, texture: Image, walk: Walk)
+  constructor (desc: MapDescriptor, background: Background, cursor: Cursor, walk: Walk)
     {
+      this._background = background
       this._cursor = cursor
       this._scale = desc.scale ?? 1
       this._spots = new Map<string, Spot> ()
-      this._texture = texture
       this._walk = walk
 
       let spots: MapDescriptor['spots']

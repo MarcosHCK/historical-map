@@ -38,6 +38,19 @@ const fetchOptions: RequestInit =
 
 export type Image = HTMLImageElement
 
+export async function queryFn (url: string, mimeTypes: string[], signal?: AbortSignal)
+{
+  const headers = { ...fetchOptions.headers, Accept: mimeTypes.join (',') }
+  const options = { ...fetchOptions, headers, signal }
+  let response: Response 
+
+  if ((response = await fetch (url, options)).status === 200)
+
+    return await dataUrl (await response.blob ())
+  else
+    throw Error (`'${url}' fetch error: ${response.status}`, { cause: 'fetch' })
+}
+
 export function queryKey (url: string | undefined, mimeTypes: string[])
 {
   return [ 'image', 'blob', url, mimeTypes ]
@@ -49,18 +62,7 @@ export function useImage (url?: string, mimeTypes = [ 'image/png', 'image/svg+xm
 
   const { data, error } = useQuery (
     { enabled: !! url,
-      queryFn: async () =>
-        {
-          const headers = { ...fetchOptions.headers, Accept: mimeTypes.join (',') }
-          const options = { ...fetchOptions, headers }
-          let response: Response 
-
-          if ((response = await fetch (url!, options)).status === 200)
-
-            return await dataUrl (await response.blob ())
-          else
-            throw Error (`'${url}' fetch error: ${response.status}`, { cause: 'fetch' })
-        },
+      queryFn: async () => await queryFn (url!, mimeTypes),
       queryKey: queryKey (url, mimeTypes) })
 
   useEffect (() => { if (error) notify.push (error) }, [error, notify])
