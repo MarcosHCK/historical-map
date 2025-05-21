@@ -19,6 +19,7 @@ import { useEffect } from 'react'
 import { useNotification } from './useNotification'
 import { useQuery } from '@tanstack/react-query'
 import { sanitize } from '../lib/sanitizeHtml';
+import { useHRefBase } from './useHRef';
 
 const fetchOptions: RequestInit =
 {
@@ -50,6 +51,7 @@ export function queryKey (url: string | undefined, type: TextFormat)
 
 export function useText (url?: string, type: TextFormat = 'plain')
 {
+  const baseUrl = useHRefBase ()
   const notify = useNotification ()
 
   const { data, error } = useQuery (
@@ -68,7 +70,7 @@ export function useText (url?: string, type: TextFormat = 'plain')
             switch (type)
               {
                 case 'html': { const html = await textUrl (await response.blob (), type)
-                              return sanitize (html) }
+                              return sanitize (html, baseUrl) }
                 case 'plain': return await textUrl (await response.blob (), type)
                 default: throw Error (`Unknown text format '${type}'`)
               }

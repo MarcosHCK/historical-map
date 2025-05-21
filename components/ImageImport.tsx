@@ -19,7 +19,6 @@ import { forwardRef, useMemo } from 'react'
 import { type ImageImport, type Image as ImageType } from '../lib/MapDescriptor'
 import { type StylesApiProps, type PolymorphicFactory } from '@mantine/core'
 import { useHRef } from '../hooks/useHRef'
-import Image from 'next/image'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type ImageImportCssVariables = { }
@@ -54,6 +53,10 @@ const ImageImport_ = forwardRef<HTMLImageElement, ImageImportProps> ((props, ref
               style={{ ...(styles?.root ?? { }),
                        height: r ? undefined : (import_ as ImageType).height,
                        width: r ? undefined : (import_ as ImageType).width }}>
-      <Image alt={alt} className={classNames?.image} src={src!} style={styles?.image} />
+
+      { // eslint-disable-next-line @next/next/no-img-element
+        <img alt={alt} className={classNames?.image} height={r ? undefined : (import_ as ImageType).height}
+             src={src!} style={styles?.image}
+                                                     width={r ? undefined : (import_ as ImageType).width} /> }
     </div>
 })
