@@ -15,41 +15,14 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.mapSpotContent
-{
-}
+export type CSSSizeValue = CSSSizeValueAbsolute | CSSSizeValuePercent
 
-.mapSpotContentWrapper
-{
-  min-width: 100%;
-}
+/**
+ * @minimum 0
+ */
+export type CSSSizeValueAbsolute = number
 
-.mapSpotOverlayContainer
-{
-  height: 100%;
-  left: 0px;
-  position: absolute;
-  top: 0px;
-  width: 100%;
-}
-
-.mapSpotPointer
-{
-  position: absolute;
-  border-radius: 100%;
-  z-index: 20;
-}
-
-.mapSpotPopoverDropdown
-{
-  --spot-popover-padding-bottom-top: var(--mantine-spacing-sm);
-  --spot-popover-padding-left-right: var(--mantine-spacing-md);
-
-  padding: var(--spot-popover-padding-bottom-top)
-           var(--spot-popover-padding-left-right);
-}
-
-.mapSpotPopoverScrollArea
-{
-  height: calc(var(--spot-popover-height) - var(--spot-popover-padding-bottom-top) * 2);
-}
+/**
+ * @pattern ^[0-9]+(\.[0-9]+)?%$
+ */
+export type CSSSizeValuePercent = string

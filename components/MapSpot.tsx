@@ -14,16 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+import { createContext, forwardRef, type ReactNode, useCallback, useContext, useEffect, useMemo } from 'react'
 import { createPolymorphicComponent, type PolymorphicComponentProps, Stack, Text } from '@mantine/core'
-import { forwardRef, type ReactNode, useMemo } from 'react'
 import { ImageImport, type ImageImportProps } from './ImageImport'
+import { mapMap } from '../lib/Array'
+import { OverlayMapSpot } from './OverlayMapSpot'
 import { PopoverMapSpot } from './PopoverMapSpot'
+import { type OverlaySpotOptions, type PopoverSpotOptions, type SpotContent } from '../lib/MapDescriptor'
 import { type Spot } from '../lib/Spot'
-import { type PopoverSpotOptions, type SpotContent } from '../lib/MapDescriptor'
 import { type SpotContentOptions } from '../lib/MapDescriptor'
 import { type Text as TextType, type TextImport } from '../lib/MapDescriptor'
 import { type UseTextReturn, useText } from '../hooks/useText'
 import { useHRef } from '../hooks/useHRef'
+import { useMap } from '@mantine/hooks'
 import css from './MapSpot.module.css'
 
 function Inner ({ type, value }: SpotContent)
@@ -76,24 +79,75 @@ function Content ({ content }: { content: SpotContent[] })
   </Stack>
 }
 
+type Active = (code: string, value: Parameters<OnActive>[0]) => void
+type Context = { active: Map<string, boolean>, onActive: Active, spots: Map<string, Spot> }
+const context = createContext<Context> ({ active: new Map (), onActive: () => {}, spots: new Map () })
+
 export interface MapSpotProps
 {
-  spot: Spot,
+  children?: ReactNode,
+  initialActive?: string[],
+  spots: Map<string, Spot>,
 }
 
-type Ct = HTMLDivElement
-type Cp = MapSpotProps
-type Pp = PolymorphicComponentProps<'div', Cp>
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface MapSpotContentProps
+{
+}
 
-// eslint-disable-next-line react/display-name
-export const MapSpot = createPolymorphicComponent<'div', Cp> (forwardRef<Ct, Pp> (({ spot, ...rest }, ref) =>
+export interface MapSpotPointerProps
+{
+  onClick: (code: string) => void,
+}
+
+export type OnActive = (value: boolean | ((last: boolean) => boolean)) => void
+
+export function MapSpot ({ children, initialActive, spots }: MapSpotProps)
 {
 
-  switch (spot.type)
+  const active = useMap<string, boolean> ()
+
+  const onActive = useCallback<Active> ((code, value) =>
+    {
+      if (! (value instanceof Function))
+        active.set (code, value)
+      else
+        active.set (code, value (active.get (code) ?? false))
+    }, [active])
+
+  useEffect (() => { active.clear (); for (const code of (initialActive ?? [])) active.set (code, true) }, [active, initialActive, spots])
+
+  return <context.Provider value={{ active, onActive, spots }}>
+    { children }
+  </context.Provider>
+}
+
+// eslint-disable-next-line react/display-name
+MapSpot.Content = createPolymorphicComponent<'div', MapSpotContentProps> (forwardRef<HTMLDivElement, PolymorphicComponentProps<'div', MapSpotContentProps>> (({ ...rest }, ref) =>
+{
+  const { active, spots } = useContext (context)
+  return <> { mapMap (spots, (spot, _, code) => { switch (spot.type)
     {
       case 'hidden': return <></>
+      case 'overlay': { const spot_ = spot as Spot<'overlay', OverlaySpotOptions>
+                        return <OverlayMapSpot.Content {...rest} active={active.get (code) ?? false} ref={ref} key={code} spot={spot_}> <Content content={spot_.options.content} key={code} /> </OverlayMapSpot.Content> }
       case 'popover': { const spot_ = spot as Spot<'popover', PopoverSpotOptions>
-                        return <PopoverMapSpot {...rest} ref={ref} spot={spot_}> <Content content={spot_.options.content} /> </PopoverMapSpot> }
+                        return <PopoverMapSpot.Content {...rest} active={active.get (code) ?? false} ref={ref} key={code} spot={spot_}> <Content content={spot_.options.content} key={code} /> </PopoverMapSpot.Content> }
       default: throw Error (`Unknown error ${spot.type}`)
-    }
+    }}) }</>
+}))
+
+// eslint-disable-next-line react/display-name
+MapSpot.Pointer = createPolymorphicComponent<'button', MapSpotPointerProps> (forwardRef<HTMLButtonElement, PolymorphicComponentProps<'button', MapSpotPointerProps>> (({ onClick, ...rest }, ref) =>
+{
+  const { onActive, spots } = useContext (context)
+  return <>{ mapMap (spots, (spot, _, code) => { switch (spot.type)
+    {
+      case 'hidden': return <></>
+      case 'overlay': { const spot_ = spot as Spot<'overlay', OverlaySpotOptions>
+                        return <OverlayMapSpot.Pointer {...rest} onActive={v => onActive (code, v)} onClick={() => onClick (code)} key={code} ref={ref} spot={spot_}> <Content content={spot_.options.content} key={code} /> </OverlayMapSpot.Pointer> }
+      case 'popover': { const spot_ = spot as Spot<'popover', PopoverSpotOptions>
+                        return <PopoverMapSpot.Pointer {...rest} onActive={v => onActive (code, v)} onClick={() => onClick (code)} key={code} ref={ref} spot={spot_}> <Content content={spot_.options.content} key={code} /> </PopoverMapSpot.Pointer> }
+      default: throw Error (`Unknown error ${spot.type}`)
+    }}) }</>
 }))

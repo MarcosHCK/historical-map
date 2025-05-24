@@ -38,12 +38,12 @@ export interface SpotPointerProps extends StylesApiProps<SpotPointerFactory>
   type: PointerContent['type'],
 }
 
-type Ct = HTMLDivElement
+type Ct = HTMLButtonElement
 type Cp = SpotPointerProps
-type Pp = PolymorphicComponentProps<'div', Cp>
+type Pp = PolymorphicComponentProps<'button', Cp>
 
 // eslint-disable-next-line react/display-name
-export const SpotPointer = createPolymorphicComponent<'div', Cp> (forwardRef<Ct, Pp> ((props, ref) =>
+export const SpotPointer = createPolymorphicComponent<'button', Cp> (forwardRef<Ct, Pp> ((props, ref) =>
 {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { at, component, content, radius, type, vars, ...rest } = props

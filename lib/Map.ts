@@ -18,7 +18,7 @@ export { MapClass as Map }
 import { Spot } from './Spot'
 import { type Background } from './Background'
 import { type Cursor } from './Cursor'
-import { type MapDescriptor } from './MapDescriptor'
+import { SpotDescriptorOptions, type MapDescriptor } from './MapDescriptor'
 import { type Point, type Walk } from './Walk'
 
 class MapClass
@@ -59,7 +59,8 @@ class MapClass
           if ((at = ats[code]) === undefined)
             throw Error (`Unknown descriptor with code '${code}'`)
 
-          this._spots.set (code, new Spot (actions, options, at))
+          this._spots.set (code, new Spot<SpotDescriptorOptions['type'],
+                                          SpotDescriptorOptions['value']> (actions, options, at))
         }
     }
 }

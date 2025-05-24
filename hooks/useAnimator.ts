@@ -16,8 +16,8 @@
  */
 'use client';
 import { Animator, type AnimationState, type StepReason, type Whence } from '../lib/Animator'
-import { type Map } from '../lib/Map';
-import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import { type Map } from '../lib/Map'
+import { type RefCallback, useCallback, useEffect, useRef, useState } from 'react'
 
 export interface AnimatorControls
 {
@@ -31,7 +31,7 @@ export interface AnimatorControls
 
 export type UseAnimatorResult =
 [
-  RefObject<null | HTMLCanvasElement>,
+  RefCallback<HTMLCanvasElement>,
   AnimatorControls,
 ]
 
@@ -49,12 +49,13 @@ export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
   const animatorRef = useRef<Animator> (null)
   const onSpotRef = useRef<UseAnimatorArgs['onSpot']> (null)
   const onLoadRef = useRef<UseAnimatorArgs['onLoad']> (null)
-  const canvasRef = useRef<HTMLCanvasElement> (null)
+  const [ canvas, canvasRef ] = useState<null | HTMLCanvasElement> (null)
   const [ state, setState ] = useState<AnimationState> ('pause')
 
   useEffect (() => { if (map)
     {
-      const canvas = canvasRef.current!
+      if (! canvas) return
+
       const animator = new Animator (canvas, map)
 
       animator.onLoad.connect ((...args) => (onLoadRef.current ?? (() => {})) (...args))
@@ -62,7 +63,7 @@ export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
       animator.reset ()
 
       return (animatorRef.current = animator, () => animator.cleanup ())
-    }}, [map])
+    }}, [canvas, map])
 
   useEffect (() => { onLoadRef.current = onLoad ?? null }, [onLoad])
   useEffect (() => { onSpotRef.current = onSpot ?? null }, [onSpot])

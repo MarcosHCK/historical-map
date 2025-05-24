@@ -15,7 +15,6 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Button, Center, Group, Overlay, Popover, ScrollArea, Slider, Stack, Transition } from '@mantine/core'
-import { mapMap } from '../lib/Array'
 import { MapSkeleton } from './MapSkeleton'
 import { MapSpot } from './MapSpot'
 import { PiFastForwardFill, PiPauseFill, PiPlayFill, PiStopFill } from 'react-icons/pi'
@@ -28,7 +27,7 @@ import { useAnimator } from '../hooks/useAnimator'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDragScrolling } from '../hooks/useDragScroll'
 import { useHaltController } from '../hooks/useHaltController'
-import { useDisclosure, useHover, useMergedRef } from '@mantine/hooks'
+import { useDisclosure, useHover, useListState, useMergedRef } from '@mantine/hooks'
 import css from './MapCanvas.module.css'
 
 function actionEnabled (desc: ActionDescriptor, reason: StepReason)
@@ -57,6 +56,7 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
   const hoverBar = hover1Bar || hover2Bar
   const cancelFocusRef = useRef<() => void> (() => {})
   const { active, moveRef, viewportRef } = useDragScrolling ({ onDrag: () => cancelFocusRef.current () })
+  const [ opened, { append: openSpot, filter: filterSpots } ] = useListState<string> ()
 
   useEffect (() => { if (! hoverBar) closeSlider () }, [closeSlider, hoverBar])
   useEffect (() => { if (map) { const position = map?.walk.getPointAtLength (0)
@@ -80,6 +80,7 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
       let action: ActionDescriptor
       for (let i = 0; i < actions.length; ++i) if (actionEnabled (action = actions[i], reason)) switch (action.type)
         {
+          case 'close': { filterSpots (s => s !== code); break; }
           case 'focus': { const desc = action.value as FocusAction | undefined
                           const behavior = takeProperty (desc?.behavior, reason, 'linear')
                           const duration = takeProperty (desc?.duration, reason, 300)
@@ -90,9 +91,10 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
                           const duration = takeProperty (desc?.duration, reason, 400)
                           halt (duration)
                           break; }
+          case  'open': { openSpot (code); break; }
           default: throw Error (`Unknown spot action '${(action as { type: string }).type}'`)
         }
-    }, [map, halt, viewportRef])
+    }, [filterSpots, halt, map, openSpot, viewportRef])
 
   const [ canvasRef, { pause, reset, seek, state, toggle } ] = useAnimator ({ map, onLoad, onSpot, pace: (halted ? 0 : 1) * velocity / 100 })
   const lengths = useMemo (() => map?.walk?.spots?.reduce ((a, { at, code }) => (a.set (code, at), a), new globalThis.Map<string, number> ()), [map])
@@ -106,14 +108,18 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
 
     <Center> <Stack className={css.canvasContainer}>
 
-      <ScrollArea h='var(--app-shell-main-col-height)' type='never' viewportRef={viewportRef} w='100%' >
+      { map && <MapSpot initialActive={opened} spots={map.spots}>
 
-        <Stack pos='relative'>
-          <canvas ref={canvasRef} />
-          { map && mapMap (map.spots, (spot, i, code) => <MapSpot component='button' key={i} spot={spot}
-            onClick={() => { let at: number | undefined; if ((at = lengths?.get (code))) seek (at, 'set') }} />) }
-        </Stack>
-      </ScrollArea>
+        <MapSpot.Content />
+
+        <ScrollArea h='var(--app-shell-main-col-height)' type='never' viewportRef={viewportRef} w='100%' >
+
+          <Stack pos='relative'>
+            <canvas ref={canvasRef} />
+            <MapSpot.Pointer onClick={code => { let at: number | undefined; if ((at = lengths?.get (code))) seek (at, 'set') }} />
+          </Stack>
+        </ScrollArea>
+      </MapSpot> }
 
       <Overlay backgroundOpacity={0} className={css.canvasOverlay} ref={useMergedRef (hover1Ref, moveRef)}
         style={{ cursor: ! active ? 'grab' : 'grabbing' }}>

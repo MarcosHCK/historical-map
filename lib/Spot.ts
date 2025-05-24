@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+import { type ActionDescriptor, type SpotDescriptor } from './MapDescriptor'
 import { type Point } from './Walk'
-import { type SpotDescriptor, type ActionDescriptor } from './MapDescriptor'
 
 export class Spot<Tt = SpotDescriptor['options']['type'],
                   Vt = SpotDescriptor['options']['value']>

@@ -14,16 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Behavior } from './scrollTo'
 import { JsonInput } from './JsonInput'
+import { type Behavior } from './scrollTo'
+import { type CSSSizeValue } from './CSSSizeValue'
 import { type StepReason } from './Animator'
 import schema from './MapDescriptor.json'
 export const input = new JsonInput (schema)
 export default input
 
 export type ActionDescriptor = { enabled?: ActionReason[] }
-                             & ({ type: 'focus', value?: FocusAction }
-                             |  { type: 'halt', value?: HaltAction })
+                             & ({ type: 'close' }
+                             |  { type: 'focus', value?: FocusAction }
+                             |  { type: 'halt', value?: HaltAction }
+                             |  { type: 'open' })
 
 export type ActionProperty<T> = T | { [P in ActionReason]?: T }
 export type ActionReason = StepReason
@@ -75,17 +78,20 @@ export interface MapDescriptor
   walkFile: string,
 }
 
+export interface OverlaySpotOptions extends SpotOptions
+{
+  overlayHeight?: CSSSizeValue,
+  overlayWidth: CSSSizeValue,
+}
+
 export type PointerContent = { type: 'color', value: PointerContentColor }
                            | { type: 'image', value: PointerContentImage }
 
 export type PointerContentColor = string
 export type PointerContentImage = ImageImport
 
-export interface PopoverSpotOptions
+export interface PopoverSpotOptions extends SpotOptions
 {
-  content: SpotContent[],
-  pointerContent?: PointerContent,
-  pointerRadius?: number,
   popoverHeight?: number,
   popoverWidth?: number,
 }
@@ -109,7 +115,15 @@ export interface SpotDescriptor
 }
 
 export type SpotDescriptorOptions = { type: 'hidden', value: undefined }
+                                  | { type: 'overlay', value: OverlaySpotOptions }
                                   | { type: 'popover', value: PopoverSpotOptions }
+
+export interface SpotOptions
+{
+  content: SpotContent[],
+  pointerContent?: PointerContent,
+  pointerRadius?: number,
+}
 
 export interface Text
 {
