@@ -80,6 +80,10 @@ export interface MapDescriptor
 
 export interface OverlaySpotOptions extends SpotOptions
 {
+  /**
+   * @minimum 0
+   */
+  overlayCloseWait?: number
   overlayHeight?: CSSSizeValue,
   overlayWidth: CSSSizeValue,
 }

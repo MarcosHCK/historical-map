@@ -29,6 +29,17 @@ import { useHRef } from '../hooks/useHRef'
 import { useMap } from '@mantine/hooks'
 import css from './MapSpot.module.css'
 
+function blendMany<K extends number | string, V> (map: Map<K, V>, key: K, value: V)
+{
+  return map.set (key, value)
+}
+
+function blendSingle<K extends number | string, V> (map: Map<K, V>, key: K, value: V)
+{
+  if (value) map.clear ()
+  return map.set (key, value)
+}
+
 function Inner ({ type, value }: SpotContent)
 {
 
@@ -79,14 +90,16 @@ function Content ({ content }: { content: SpotContent[] })
   </Stack>
 }
 
-type Active = (code: string, value: Parameters<OnActive>[0]) => void
-type Context = { active: Map<string, boolean>, onActive: Active, spots: Map<string, Spot> }
-const context = createContext<Context> ({ active: new Map (), onActive: () => {}, spots: new Map () })
+export type Active = (code: string, value: Parameters<OnActive>[0]) => void
+export type Context = { active: Map<string, boolean>, automate: boolean, onActive: Active, spots: Map<string, Spot> }
+const context = createContext<Context> ({ active: new Map (), automate: false, onActive: () => {}, spots: new Map () })
 
 export interface MapSpotProps
 {
+  automate?: boolean,
   children?: ReactNode,
   initialActive?: string[],
+  multiselect?: boolean,
   spots: Map<string, Spot>,
 }
 
@@ -102,22 +115,26 @@ export interface MapSpotPointerProps
 
 export type OnActive = (value: boolean | ((last: boolean) => boolean)) => void
 
-export function MapSpot ({ children, initialActive, spots }: MapSpotProps)
+export const useMapSpotContext = () => useContext (context)
+
+export function MapSpot ({ automate, children, initialActive, multiselect, spots }: MapSpotProps)
 {
 
   const active = useMap<string, boolean> ()
+  const blend = useMemo (() => !! multiselect ? blendMany : blendSingle, [multiselect])
 
   const onActive = useCallback<Active> ((code, value) =>
     {
       if (! (value instanceof Function))
-        active.set (code, value)
+
+        blend (active, code, value)
       else
-        active.set (code, value (active.get (code) ?? false))
-    }, [active])
+        blend (active, code, value (active.get (code) ?? false))
+    }, [active, blend])
 
-  useEffect (() => { active.clear (); for (const code of (initialActive ?? [])) active.set (code, true) }, [active, initialActive, spots])
+  useEffect (() => { active.clear (); for (const code of (initialActive ?? [])) active.set (code, true) }, [active, blend, initialActive, spots])
 
-  return <context.Provider value={{ active, onActive, spots }}>
+  return <context.Provider value={{ active, automate: automate ?? false, onActive, spots }}>
     { children }
   </context.Provider>
 }
@@ -140,14 +157,16 @@ MapSpot.Content = createPolymorphicComponent<'div', MapSpotContentProps> (forwar
 // eslint-disable-next-line react/display-name
 MapSpot.Pointer = createPolymorphicComponent<'button', MapSpotPointerProps> (forwardRef<HTMLButtonElement, PolymorphicComponentProps<'button', MapSpotPointerProps>> (({ onClick, ...rest }, ref) =>
 {
-  const { onActive, spots } = useContext (context)
+  const { automate, onActive, spots } = useContext (context)
+  const onActive_ = useCallback ((...args: Parameters<Active>) => { if (! automate) onActive (...args) }, [automate, onActive])
+
   return <>{ mapMap (spots, (spot, _, code) => { switch (spot.type)
     {
       case 'hidden': return <></>
       case 'overlay': { const spot_ = spot as Spot<'overlay', OverlaySpotOptions>
-                        return <OverlayMapSpot.Pointer {...rest} onActive={v => onActive (code, v)} onClick={() => onClick (code)} key={code} ref={ref} spot={spot_}> <Content content={spot_.options.content} key={code} /> </OverlayMapSpot.Pointer> }
+                        return <OverlayMapSpot.Pointer {...rest} onActive={v => onActive_ (code, v)} onClick={() => onClick (code)} key={code} ref={ref} spot={spot_}> <Content content={spot_.options.content} key={code} /> </OverlayMapSpot.Pointer> }
       case 'popover': { const spot_ = spot as Spot<'popover', PopoverSpotOptions>
-                        return <PopoverMapSpot.Pointer {...rest} onActive={v => onActive (code, v)} onClick={() => onClick (code)} key={code} ref={ref} spot={spot_}> <Content content={spot_.options.content} key={code} /> </PopoverMapSpot.Pointer> }
+                        return <PopoverMapSpot.Pointer {...rest} onActive={v => onActive_ (code, v)} onClick={() => onClick (code)} key={code} ref={ref} spot={spot_}> <Content content={spot_.options.content} key={code} /> </PopoverMapSpot.Pointer> }
       default: throw Error (`Unknown error ${spot.type}`)
     }}) }</>
 }))

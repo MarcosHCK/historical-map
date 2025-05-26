@@ -14,47 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect, useState } from 'react'
 
-.mapSpotContent
+export const useDebouncedOff = (value: boolean, wait: number) =>
 {
-}
 
-.mapSpotContentWrapper
-{
-  min-width: 100%;
-}
+  const [ debounced, setDebounced ] = useState (value)
 
-.mapSpotOverlay
-{
-  z-index: 29;
-}
-
-.mapSpotOverlayContainer
-{
-  height: 100%;
-  left: 0px;
-  position: absolute;
-  top: 0px;
-  width: 100%;
-}
-
-.mapSpotPointer
-{
-  position: absolute;
-  border-radius: 100%;
-  z-index: 20;
-}
-
-.mapSpotPopoverDropdown
-{
-  --spot-popover-padding-bottom-top: var(--mantine-spacing-sm);
-  --spot-popover-padding-left-right: var(--mantine-spacing-md);
-
-  padding: var(--spot-popover-padding-bottom-top)
-           var(--spot-popover-padding-left-right);
-}
-
-.mapSpotPopoverScrollArea
-{
-  height: calc(var(--spot-popover-height) - var(--spot-popover-padding-bottom-top) * 2);
+  useEffect (() =>
+    {
+      if (value) { setDebounced (true) }
+            else { const timer = setTimeout (() => setDebounced (false), wait)
+                   return () => clearTimeout (timer) }
+    }, [value, wait])
+return debounced
 }

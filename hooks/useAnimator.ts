@@ -61,8 +61,10 @@ export function useAnimator (args: UseAnimatorArgs): UseAnimatorResult
       animator.onLoad.connect ((...args) => (onLoadRef.current ?? (() => {})) (...args))
       animator.onSpot.connect ((...args) => (onSpotRef.current ?? (() => {})) (...args))
       animator.reset ()
+      animator.step = pace * (map.scale ?? 1)
 
       return (animatorRef.current = animator, () => animator.cleanup ())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }}, [canvas, map])
 
   useEffect (() => { onLoadRef.current = onLoad ?? null }, [onLoad])

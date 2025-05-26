@@ -17,10 +17,11 @@
 import { createPolymorphicComponent, rem, Overlay, ScrollArea, Transition } from '@mantine/core'
 import { forwardRef, useMemo } from 'react'
 import { SpotPointer } from './SpotPointer'
-import { type OnActive } from './MapSpot'
+import { type OnActive, useMapSpotContext } from './MapSpot'
 import { type OverlaySpotOptions } from '../lib/MapDescriptor'
 import { type PolymorphicComponentProps } from '@mantine/core'
 import { type Spot } from '../lib/Spot'
+import { useHover, useTimeout } from '@mantine/hooks'
 import css from './MapSpot.module.css'
 
 function isNumber (value: unknown)
@@ -50,12 +51,16 @@ export const OverlayMapSpot =
   Content: createPolymorphicComponent<'div', Cp & { active: boolean }> (forwardRef<HTMLDivElement, Pp & { active: boolean }> ((props, ref) =>
     {
       const { active, children, spot } = props
+      const { ref: hoverRef, hovered } = useHover ()
+      const { automate } = useMapSpotContext ()
       const height = useMemo (() => processSize (spot.options.overlayHeight ?? '100%'), [spot])
       const width = useMemo (() => `min(50%, ${processSize (spot.options.overlayWidth)})`, [spot])
 
       return <div className={css.mapSpotOverlayContainer}> <div ref={ref} style={{ height, position: 'relative', width }}>
 
-          <Transition keepMounted mounted={active}>{ style => <Overlay style={style}>
+        <Transition keepMounted mounted={active || (hovered && ! automate)}>{ style =>
+
+          <Overlay className={css.mapSpotOverlay} ref={hoverRef} style={style}>
 
             <ScrollArea.Autosize mah='100%' maw='100%'>{ children }</ScrollArea.Autosize>
           </Overlay> }</Transition>
@@ -66,9 +71,10 @@ export const OverlayMapSpot =
   Pointer: createPolymorphicComponent<'button', Cp & { onActive: OnActive }> (forwardRef<HTMLButtonElement, Pp<'button'> & { onActive: OnActive }> ((props, ref) =>
     {
       const { onActive, spot, ...rest } = props
+      const { start: close } = useTimeout (() => onActive (false), spot.options.overlayCloseWait ?? 1000)
       const radius = spot.options.pointerRadius ?? 13
 
-      return <SpotPointer {...rest} at={spot.position} onMouseEnter={() => onActive (true)} onMouseLeave={() => onActive (false)} radius={radius} ref={ref}
+      return <SpotPointer {...rest} at={spot.position} onMouseEnter={() => onActive (true)} onMouseLeave={close} radius={radius} ref={ref}
         {...{ content: spot.options.pointerContent?.value ?? 'black', type: spot.options.pointerContent?.type ?? 'color' }} />
     })),
 }

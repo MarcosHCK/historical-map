@@ -15,26 +15,14 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { createPolymorphicComponent, rem, type PolymorphicComponentProps, Popover, ScrollArea } from '@mantine/core'
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef } from 'react'
 import { SpotPointer } from './SpotPointer'
 import { type OnActive } from './MapSpot'
 import { type PopoverSpotOptions } from '../lib/MapDescriptor'
 import { type Spot } from '../lib/Spot'
+import { useDebouncedOff } from '../hooks/useDebouncedOff'
 import { useHover, useMergedRef } from '@mantine/hooks'
 import css from './MapSpot.module.css'
-
-function useEaseOutValue (value: boolean, wait: number)
-{
-  const [ debounced, setDebounced ] = useState (value)
-
-  useEffect (() =>
-    {
-      if (value) setDebounced (true)
-            else { const timer = setTimeout (() => setDebounced (false), wait)
-                   return () => clearTimeout (timer) }
-    }, [value, wait])
-return debounced
-}
 
 export interface PopoverMapSpotProps
 {
@@ -61,7 +49,7 @@ export const PopoverMapSpot =
       const hovered = hovered1 || hovered2
       const radius = spot.options.pointerRadius ?? 13
 
-      return <Popover keepMounted={true} opened={useEaseOutValue (hovered, 200)}>
+      return <Popover keepMounted={true} opened={useDebouncedOff (hovered, 200)}>
 
         <Popover.Target>
 

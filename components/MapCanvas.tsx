@@ -56,7 +56,7 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
   const hoverBar = hover1Bar || hover2Bar
   const cancelFocusRef = useRef<() => void> (() => {})
   const { active, moveRef, viewportRef } = useDragScrolling ({ onDrag: () => cancelFocusRef.current () })
-  const [ opened, { append: openSpot, filter: filterSpots } ] = useListState<string> ()
+  const [ opened, { setState: openSpots, filter: filterSpots } ] = useListState<string> ()
 
   useEffect (() => { if (! hoverBar) closeSlider () }, [closeSlider, hoverBar])
   useEffect (() => { if (map) { const position = map?.walk.getPointAtLength (0)
@@ -91,15 +91,15 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
                           const duration = takeProperty (desc?.duration, reason, 400)
                           halt (duration)
                           break; }
-          case  'open': { openSpot (code); break; }
+          case  'open': { openSpots ([ code ]); break; }
           default: throw Error (`Unknown spot action '${(action as { type: string }).type}'`)
         }
-    }, [filterSpots, halt, map, openSpot, viewportRef])
+    }, [filterSpots, halt, map, openSpots, viewportRef])
 
   const [ canvasRef, { pause, reset, seek, state, toggle } ] = useAnimator ({ map, onLoad, onSpot, pace: (halted ? 0 : 1) * velocity / 100 })
   const lengths = useMemo (() => map?.walk?.spots?.reduce ((a, { at, code }) => (a.set (code, at), a), new globalThis.Map<string, number> ()), [map])
 
-  const resetAnimation = useCallback (() => { if (!! map) { pause (); reset () }}, [map, pause, reset])
+  const resetAnimation = useCallback (() => { if (!! map) { pause (); reset () }; openSpots ([ ]) }, [map, openSpots, pause, reset])
   const toggleAnimation = useCallback (() => { if (!! map) { toggle () }}, [map, toggle])
 
   return <Stack pos='relative'>
@@ -108,7 +108,7 @@ export const MapCanvas = ({ map }: { map?: Map }) =>
 
     <Center> <Stack className={css.canvasContainer}>
 
-      { map && <MapSpot initialActive={opened} spots={map.spots}>
+      { map && <MapSpot automate={state === 'play'} initialActive={opened} spots={map.spots}>
 
         <MapSpot.Content />
 
