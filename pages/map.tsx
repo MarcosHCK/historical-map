@@ -15,23 +15,26 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Alert } from "@mantine/core"
-import { Map as MapMain } from '../components/Map'
+import { Map } from '../components/Map'
 import { useRouter } from "next/router"
 import { useMemo } from "react"
 
+function Bad ()
+{
+  return <Alert color='red'>Bad use of map route</Alert>
+}
+
 function Good ({ query }: { query: string })
 {
-
   const meta = useMemo (() => Buffer.from (query, 'base64').toString ('utf8'), [query])
-  return <MapMain meta={meta} />
+  return <Map meta={meta} />
 }
 
 export const MapPage = () =>
 {
   const router = useRouter ()
   const { meta: query } = router.query
-
-  return query && ! Array.isArray (query) ? <Good query={query} /> : <Alert color='red'>Bad use of map route</Alert>
+  return query === undefined ? <></> : Array.isArray (query) ? <Bad /> : <Good query={query} />
 }
 
 export default MapPage

@@ -15,23 +15,8 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 export { MapMain as Map }
-import { Map } from '../lib/Map'
-import { MapCanvas } from './MapCanvas'
-import { useBackground } from '../hooks/useBackground'
-import { useCursor } from '../hooks/useCursor'
-import { useHRef } from '../hooks/useHRef'
-import { useMapDescriptor } from '../hooks/useMapDescriptor'
-import { useMapWalkPath } from '../hooks/useMapWalkPath'
-import { useMemo } from 'react'
 
 const MapMain = ({ meta }: { meta: string }) =>
 {
-  const desc = useMapDescriptor (useHRef (meta)!)
-  const background = useBackground (desc?.background)
-  const cursor = useCursor (desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg'))
-  const walk = useMapWalkPath (useHRef (desc?.walkFile))
-  const map = useMemo (() => cursor && background && desc && walk && new Map (desc, background, cursor, walk),
-                            [cursor, background, desc, walk])
-
-  return ! map ? <MapCanvas /> : <MapCanvas map={map} />
+  return <p>{ `map for ${meta}` }</p>
 }

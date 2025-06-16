@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import schema from './MapsIndexSchema.json'
+import schema from './MapsIndex.json'
 import { JsonInput } from './JsonInput'
 export const input = new JsonInput (schema)
 export default input
