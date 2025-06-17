@@ -21,8 +21,8 @@ export default input
 
 export interface MapsIndex
 {
-  entries: MapsIndexEntry[]
-  version: string
+  entries: MapsIndexEntry[];
+  version: '1.1';
 }
 
 export type MapsIndexEntry = { type: 'group', value: MapsIndexEntryGroup }
@@ -30,12 +30,13 @@ export type MapsIndexEntry = { type: 'group', value: MapsIndexEntryGroup }
 
 export interface MapsIndexEntryGroup
 {
-  entries: MapsIndexEntry[]
-  title: string
+  entries: MapsIndexEntry[];
+  title: string;
 }
 
 export interface MapsIndexEntryMap
 {
-  metaFile: string
-  title: string
+  mapLayer: string;
+  title: string;
+  walkLayer: string;
 }

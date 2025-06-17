@@ -16,7 +16,7 @@
  */
 export { MapMain as Map }
 
-const MapMain = ({ meta }: { meta: string }) =>
+const MapMain = ({ map, walk }: { map: string, walk: string }) =>
 {
-  return <p>{ `map for ${meta}` }</p>
+  return <p>{ `map for ${map}, ${walk}` }</p>
 }
