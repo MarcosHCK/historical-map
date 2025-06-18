@@ -14,17 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-export { MapMain as Map }
-import 'maplibre-gl/dist/maplibre-gl.css'
-import { Stack } from '@mantine/core'
-import { useHRef } from '../hooks/useHRef'
-import { useMap } from '../hooks/useMap'
-import css from './Map.module.css'
 
-const MapMain = ({ map, walk }: { map: string, walk: string }) =>
+.mapContainer
 {
-  const mapUrl = useHRef (map)
-  const walkUrl = useHRef (walk)
-  const { ref } = useMap (mapUrl, walkUrl)
-return <Stack className={css.mapContainer} ref={ref} />
+  height: var(--app-shell-main-col-height);
+  max-height: var(--app-shell-main-col-height);
+  max-width: 100%;
+  position: relative;
 }
