@@ -2,12 +2,8 @@
   "entries": [
     {
       "type": "map",
-      "value": { "metaFile": "/maps/marti1895.json", "title": "Martí journey 1895 - From Playitas to Dos Ríos" }
-    },
-    {
-      "type": "map",
-      "value": { "metaFile": "/maps/westcampaign1895.json", "title": "West campaign 1895" }
+      "value": { "mapLayer": "/maps/1b1decc1291b05d1.json", "title": "Martí journey 1895 - From Playitas to Dos Ríos", "walkLayer": "nothing yet" }
     }
   ],
-  "version": "1.0"
+  "version": "1.1"
 }
