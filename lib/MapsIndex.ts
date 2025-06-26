@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
-import schema from './MapsIndexSchema.json'
+import schema from './MapsIndex.json'
 import { JsonInput } from './JsonInput'
 export const input = new JsonInput (schema)
 export default input
 
 export interface MapsIndex
 {
-  entries: MapsIndexEntry[]
-  version: string
+  entries: MapsIndexEntry[];
+  version: '1.1';
 }
 
 export type MapsIndexEntry = { type: 'group', value: MapsIndexEntryGroup }
@@ -30,12 +30,13 @@ export type MapsIndexEntry = { type: 'group', value: MapsIndexEntryGroup }
 
 export interface MapsIndexEntryGroup
 {
-  entries: MapsIndexEntry[]
-  title: string
+  entries: MapsIndexEntry[];
+  title: string;
 }
 
 export interface MapsIndexEntryMap
 {
-  metaFile: string
-  title: string
+  mapLayer: string;
+  title: string;
+  walkLayer: string;
 }

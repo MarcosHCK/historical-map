@@ -15,36 +15,10 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 
-type Callback<Args extends unknown[], R> = (...args: Args) => R
-
-export class Hooks<Args extends unknown[], R = never>
+.mapContainer
 {
-
-  public add (callback: (...args: Args) => R)
-    {
-      const id = this._callbacks.length
-      this._callbacks.push (callback)
-    return id
-    }
-
-  public call (...args: Args)
-    {
-
-      let fn: null | Callback<Args, R>
-
-      for (let i = 0; i < this._callbacks.length; ++i) if (!! (fn = this._callbacks[i]))
-        fn (...args)
-    }
-
-  public clear ()
-    {
-      this._callbacks = []
-    }
-
-  public del (id: number)
-    {
-      this._callbacks[id] = null
-    }
-
-  private _callbacks: (null | Callback<Args, R>)[] = [ ]
+  height: var(--app-shell-main-col-height);
+  max-height: var(--app-shell-main-col-height);
+  max-width: 100%;
+  position: relative;
 }

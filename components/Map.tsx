@@ -15,23 +15,16 @@
  * along with Historical-Map. If not, see <http://www.gnu.org/licenses/>.
  */
 export { MapMain as Map }
-import { Map } from '../lib/Map'
-import { MapCanvas } from './MapCanvas'
-import { useBackground } from '../hooks/useBackground'
-import { useCursor } from '../hooks/useCursor'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import { Stack } from '@mantine/core'
 import { useHRef } from '../hooks/useHRef'
-import { useMapDescriptor } from '../hooks/useMapDescriptor'
-import { useMapWalkPath } from '../hooks/useMapWalkPath'
-import { useMemo } from 'react'
+import { useMap } from '../hooks/useMap'
+import css from './Map.module.css'
 
-const MapMain = ({ meta }: { meta: string }) =>
+const MapMain = ({ map, walk }: { map: string, walk: string }) =>
 {
-  const desc = useMapDescriptor (useHRef (meta)!)
-  const background = useBackground (desc?.background)
-  const cursor = useCursor (desc === undefined ? undefined : (desc?.cursor ?? '/cursor.svg'))
-  const walk = useMapWalkPath (useHRef (desc?.walkFile))
-  const map = useMemo (() => cursor && background && desc && walk && new Map (desc, background, cursor, walk),
-                            [cursor, background, desc, walk])
-
-  return ! map ? <MapCanvas /> : <MapCanvas map={map} />
+  const mapUrl = useHRef (map)
+  const walkUrl = useHRef (walk)
+  const { ref } = useMap (mapUrl, walkUrl)
+return <Stack className={css.mapContainer} ref={ref} />
 }

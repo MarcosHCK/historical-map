@@ -26,6 +26,11 @@ import { useMapsIndex } from '../hooks/useMapsIndex'
 import { forwardRef, useMemo } from 'react'
 import Link from 'next/link'
 
+type MapTreeNodeData = TreeNodeData & 
+{
+  nodeProps: { walk: MapsIndexEntryMap['walkLayer'] }
+}
+
 function parseGroup (group: MapsIndexEntryGroup): TreeNodeData
 {
   const children = group.entries.map (e => parseEntries (e))
@@ -41,8 +46,9 @@ function parseIndex (index: _MapsIndex)
 function parseMap (map: MapsIndexEntryMap): TreeNodeData
 {
   const label = map.title
-  const value = map.metaFile
-  return { label, value }
+  const value = map.mapLayer
+  const nodeProps = { walk: map.walkLayer }
+  return { label, nodeProps, value }
 }
 
 function parseEntries (entries: MapsIndexEntry) { switch (entries.type)
@@ -64,6 +70,13 @@ function Icon ({ expanded, folder }: { expanded: boolean, folder: boolean })
     }
 }
 
+function fragment ({ nodeProps: { walk }, value: map }: MapTreeNodeData)
+{
+  const f1 = `map=${Buffer.from (map).toString ('base64')}`
+  const f2 = `walk=${Buffer.from (walk).toString ('base64')}`
+return [ f1, f2 ].join ('&')
+}
+
 function Leaf ({ node, expanded, hasChildren, elementProps }: RenderTreeNodePayload)
 {
   return <Group gap={5} {...elementProps}>
@@ -71,7 +84,7 @@ function Leaf ({ node, expanded, hasChildren, elementProps }: RenderTreeNodePayl
     <Icon expanded={expanded} folder={hasChildren} />
     { node.value === ''
       ? <Text component='span' >{ node.label }</Text>
-      : <Text component={Link} href={`/map?meta=${Buffer.from (node.value).toString ('base64')}`}>{ node.label }</Text> }
+      : <Text component={Link} href={`/map?${fragment (node as MapTreeNodeData)}`}>{ node.label }</Text> }
   </Group>
 }
 
